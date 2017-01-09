@@ -1,5 +1,6 @@
 # Hash tables, etc.
 
+from . import tests
 
 
 def universal_hashing(key, prime=0):
@@ -14,8 +15,9 @@ class LinearGrowthHashTable:
         self._bucket_capacity = bucket_capacity
         self._n_items = 0
         self._key_width = 1
-        # List of buckets of items
-        self._buckets = [[]]
+        # List of buckets of items.  There must be at least enough
+        # buckets to support the key width.
+        self._buckets = [[], []]
 
     def __len__(self):
         return self._n_items
@@ -25,10 +27,10 @@ class LinearGrowthHashTable:
         key = hash(item)
         #hkey = universal_hashing(key)
         # Mask off lower order bits to find bucket, slighly different than mod?
-        bucket_idx = int((1 <<< self._key_width) & key)
+        bucket_idx = (2 ** self._key_width - 1) & key
         # Strip the highest bit to bring the index into range if necessary
-        if bucket_idx > len(self._buckets):
-            bucket_idx -= 2 ** self._key_width
+        if bucket_idx >= len(self._buckets):
+            bucket_idx -= 2 ** (self._key_width - 1)
         return bucket_idx
 
     def _lookup(self, item):
@@ -53,29 +55,32 @@ class LinearGrowthHashTable:
             self._buckets[bucket_idx].append(item)
             self._n_items += 1
         # Grow capacity if needed
-        load = self._n_items / (len(self._buckets) * self._bucket_capacity)
-        if load > self._load_factor:
-            self._grow(bucket_index)
+        if self._n_items / (len(self._buckets) * self._bucket_capacity) > self._load_factor:
+            self._grow()
 
-    def del(self, item):
+    def discard(self, item):
         bucket_idx, item_idx = self._lookup(item)
-        if item_idx is None:
+        if item_idx is not None:
             del self._buckets[bucket_idx][item_idx]
             self._n_items -= 1
 
-    def _grow(self, bucket_idx):
+    def _grow(self):
         """Split the given bucket into the given one and a new one."""
-        # Create buckets to split the items into
-        lo = []
+        # Add a bucket "hi"
         hi = []
-        lo_idx = bucket_idx
         hi_idx = len(self._buckets)
+        self._buckets.append(hi)
         # Update the key width if needed
-        if hi_idx > 2 ** self._key_width:
+        if hi_idx >= 2 ** self._key_width:
             self._key_width += 1
-        # Split the items into the new buckets
-        bucket = self._buckets[bucket_idx]
-        for item in bucket:
+        # Find the corresponding "lo" bucket
+        lo = []
+        lo_idx = hi_idx - 2 ** (self._key_width - 1)
+        # Replace the old lo bucket
+        old = self._buckets[lo_idx]
+        self._buckets[lo_idx] = lo
+        # Split the old items into the new buckets
+        for item in old:
             bucket_idx = self._bucket_index(item)
             if bucket_idx == lo_idx:
                 lo.append(item)
@@ -83,6 +88,12 @@ class LinearGrowthHashTable:
                 hi.append(item)
             else:
                 ValueError('Hashing Failure: Invalid bucket index: {}'.format(bucket_idx))
-        # Add the new buckets
-        self._buckets[lo_idx] = lo
-        self._buckets.append(hi)
+
+
+class LinearGrowthHashTableTest(tests.SetTest):
+
+    def _new(self, items=()):
+        _set = LinearGrowthHashTable()
+        for item in items:
+            _set.add(item)
+        return _set
