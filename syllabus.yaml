@@ -1,0 +1,95 @@
+# Goals and record of computer science review and practice
+
+%YAML 1.2
+---
+
+problems:
+
+  traveling salesman:
+    what: analysis and complexity, solution algorithms
+    how: study
+
+  knapsack:
+    what: analysis and complexity, solution algorithms
+    how: study
+
+
+algorithms:
+
+  quicksort:
+    how: programming
+
+  mergesort:
+    how: programming
+
+  non-comparison sort:
+    how: programming
+
+  dynamic programming:
+    what: edit distance, sequence alignment, ?
+    how: programming
+
+  depth- and breadth-first search:
+    how: programming
+
+
+data structures:
+
+  hash table:
+    how: programming
+    where: hash.py:LinearGrowthHashTable
+    when: 2017-01-08
+    study time: 0:20
+    prog time: 0:45
+
+  balanced search tree:
+    what: red-black, splay, AVL
+    how: programming
+
+  heap / priority queue:
+    how: programming
+
+  trie:
+    how: ?
+
+  graphs:
+    how: study
+
+
+other:
+
+  concurrency:
+    what: locks, mutexes, semaphores, monitors
+    how: study
+
+  combinatorics:
+    what: n-choose-k problems
+    how: study
+
+  recursion:
+    what: problems better solved by recursion than iteration
+    how: study
+
+
+resources:
+
+  Dean Jackson\'s ACM article:
+    url: http://static.googleusercontent.com/media/research.google.com/en/us/pubs/archive/41881.pdf
+
+  Cracking the Coding Interview Video:
+    url: https://www.youtube.com/watch?v=aClxtDcdpsQ
+
+  Five Essential Phone Screen Questions by Steve Yegge:
+    url: https://sites.google.com/site/steveyegge2/five-essential-phone-screen-questions
+
+  Google Spanner:
+    what: globally-distributed DB
+    url: http://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf
+
+  TopCoder Tutorials:
+    url: http://www.topcoder.com/
+
+  Programming Challenges:
+    url: http://www.programming-challenges.com/pg.php?page=index
+
+...
