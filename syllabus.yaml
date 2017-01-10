@@ -37,7 +37,7 @@ data structures:
 
   hash table:
     how: programming
-    where: hash.py:LinearGrowthHashTable
+    where: src/hash.py:LinearGrowthHashTable
     when: 2017-01-08
     study time: 0:20
     prog time: 0:45
@@ -48,6 +48,10 @@ data structures:
 
   heap / priority queue:
     how: programming
+    where: src/heap.py:Heap
+    when: 2017-01-10
+    study time: 0:48
+    prog time: 1:11
 
   trie:
     how: ?
