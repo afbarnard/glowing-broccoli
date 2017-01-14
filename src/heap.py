@@ -1,5 +1,7 @@
 # Heaps and priority queues
 
+from . import tests
+
 
 class Heap:
 
@@ -92,7 +94,7 @@ class Heap:
         if self._n_items > 0:
             return self._items[0]
         else:
-            return None
+            raise LookupError('Empty heap')
 
     def pop(self):
         max_val = self._items[0]
@@ -113,14 +115,15 @@ class Heap:
 
     def extend(self, items):
         items = list(items)
-        self._items[:self._n_items].extend(items) # TODO returns number of items?
+        self._items[self._n_items:self._n_items] = items
         self._n_items += len(items)
         self._heapify()
 
     def discard(self, item):
-        idx = self._items[:self._n_items].index_of(item)
-        if idx < 0:
+        items = self._items[:self._n_items]
+        if item not in items:
             return
+        idx = items.index(item)
         # Replace this item with the last item and adjust it up or down
         self._n_items -= 1
         if idx < self._n_items:
@@ -128,8 +131,17 @@ class Heap:
             self._update(idx)
 
     def update(self, old, new):
-        idx = self._items[:self._n_items].index_of(old)
-        if idx < 0:
+        items = self._items[:self._n_items]
+        if old not in items:
             return
+        idx = items.index(old)
         self._items[idx] = new
         self._update(idx)
+
+
+class HeapTest(tests.HeapTest):
+
+    def _new(self, items=()):
+        heap = Heap()
+        heap.extend(items)
+        return heap
