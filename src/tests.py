@@ -328,12 +328,12 @@ class SortTest(unittest.TestCase):
 
     def test_in_place(self):
         sort = self._new()
-        bef = [4, 1, 4, 2, 5, 7, 7]
-        ans = [1, 2, 4, 4, 5, 7, 7]
-        aft = sort(bef)
-        self.assertEqual(ans, aft)
+        things = [4, 1, 4, 2, 5, 7, 7]
+        answer = [1, 2, 4, 4, 5, 7, 7]
+        result = sort(things)
+        self.assertEqual(answer, result)
         if sort is not sorted:
-            self.assertIs(bef, aft)
+            self.assertIs(things, result)
 
     def test_instantiate_iterable(self):
         sort = self._new()
