@@ -18,6 +18,10 @@ algorithms:
 
   quicksort:
     how: programming
+    where: src/sorts.py:quick
+    when: 2017-01-18
+    study time: 0:00
+    prog time: 1:20 # although I was going for good code not quick code
 
   mergesort:
     how: programming
