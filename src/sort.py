@@ -32,32 +32,15 @@ def _pivot_random(keys, start_idx, stop_idx):
     idx = random.randrange(start_idx, stop_idx)
     return idx, keys[idx]
 
-def _quick(keys, items, start_idx, stop_idx, pick_pivot):
-    length = stop_idx - start_idx
-    last_idx = stop_idx - 1
-    # Base case 1: List of length 1 is already sorted
-    if length <= 1:
-        return
-    # Base case 2: Sort list of length 2 by swapping
-    elif length == 2:
-        if keys[start_idx] <= keys[last_idx]:
-            # Already sorted
-            return
-        else:
-            _swap(keys, start_idx, last_idx)
-            if items is not None:
-                _swap(items, start_idx, last_idx)
-            return
-    # List is at least length 3 which is enough to actually do quicksort
-    # Pick a pivot
-    pivot_idx, pivot_key = pick_pivot(keys, start_idx, stop_idx)
-    if items is not None:
-        pivot_item = items[pivot_idx]
+def _partition(keys, items, start_idx, stop_idx, pivot_idx, pivot_key):
+    """Shellsort-like partition function as I remember learning it."""
+    # Save off the pivot item so that there is an empty slot
+    pivot_item = items[pivot_idx] if items is not None else None
     # Partition items based on the pivot.  Items equal to the pivot go
     # in the low partition.  Invariant: lo_idx <= empty_idx <= hi_idx.
     empty_idx = pivot_idx
     lo_idx = start_idx
-    hi_idx = last_idx
+    hi_idx = stop_idx - 1
     while lo_idx < hi_idx:
         # Leave all keys less than or equal to the pivot in place
         while keys[lo_idx] <= pivot_key and lo_idx < empty_idx:
@@ -65,7 +48,7 @@ def _quick(keys, items, start_idx, stop_idx, pick_pivot):
         # Leave all keys greater than the pivot in place
         while keys[hi_idx] > pivot_key and hi_idx > empty_idx:
             hi_idx -= 1
-        # Done.  Everything was already on the correct sides of the pivot.
+        # Done.  Everything is now on the correct sides of the pivot.
         if lo_idx == empty_idx == hi_idx:
             continue
         # Move the empty slot to keep it in the middle
@@ -96,24 +79,49 @@ def _quick(keys, items, start_idx, stop_idx, pick_pivot):
     keys[empty_idx] = pivot_key
     if items is not None:
         items[empty_idx] = pivot_item
-    # Recur on partitions (but only if non-empty -- it's possible the
-    # pivot was first or last)
-    if empty_idx - 1 > start_idx:
-        _quick(keys, items, start_idx, empty_idx, pick_pivot)
-    if stop_idx > empty_idx + 2:
-        _quick(keys, items, empty_idx + 1, stop_idx, pick_pivot)
+    # Return the final index of the pivot
+    return empty_idx
 
-def quick(items, key=None, pick_pivot=_pivot_median_3):
+def _quick(keys, items, start_idx, stop_idx, pick_pivot, partition):
+    length = stop_idx - start_idx
+    last_idx = stop_idx - 1
+    # Base case 1: List of length 1 is already sorted
+    if length <= 1:
+        return
+    # Base case 2: Sort list of length 2 by swapping
+    elif length == 2:
+        if keys[start_idx] <= keys[last_idx]:
+            # Already sorted
+            return
+        else:
+            _swap(keys, start_idx, last_idx)
+            if items is not None:
+                _swap(items, start_idx, last_idx)
+            return
+    # List is at least length 3 which is enough to actually do quicksort
+    # Pick a pivot
+    pivot_idx, pivot_key = pick_pivot(keys, start_idx, stop_idx)
+    # Partition items based on the pivot
+    pivot_idx = partition(keys, items, start_idx, stop_idx, pivot_idx, pivot_key)
+    # Recur on partitions, but only if at least size 2.  It's possible
+    # the pivot was first or last resulting in an empty partition.
+    # Plus, a partition of size 1 is already sorted.
+    if pivot_idx - 1 > start_idx:
+        _quick(keys, items, start_idx, pivot_idx, pick_pivot, partition)
+    if stop_idx > pivot_idx + 2:
+        _quick(keys, items, pivot_idx + 1, stop_idx, pick_pivot, partition)
+
+def quick(items, key=None, pick_pivot=_pivot_median_3, partition=_partition):
     # Instantiate items as a list if not indexable
     if not hasattr(items, '__setitem__') or not hasattr(items, '__getitem__'):
         items = list(items)
     # Items are also keys
     if key is None:
-        _quick(items, None, 0, len(items), pick_pivot=pick_pivot)
+        _quick(items, None, 0, len(items), pick_pivot=pick_pivot, partition=partition)
     # Make keys
     else:
         keys = [key(item) for item in items]
-        _quick(keys, items, 0, len(items), pick_pivot=pick_pivot)
+        _quick(keys, items, 0, len(items), pick_pivot=pick_pivot, partition=partition)
     return items
 
 
