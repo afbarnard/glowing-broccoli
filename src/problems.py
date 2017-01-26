@@ -6,30 +6,42 @@
 # Given denominations x_i and amount n, find the fewest coins that sum
 # to n
 #
-# m[0] = 0
-# m[n] = 1 + min(x_i <= n, min[n - x_i])
-# d[0] = 0
-# d[n] = argmin(x_i <= n, min[n - x_i])
+# mins[0] = 0
+# mins[n] = 1 + min(x_i <= n, min[n - x_i])
+# dens[0] = 0
+# dens[n] = argmin(x_i <= n, min[n - x_i])
 def change(denoms, amount):
     # Prefer large denominations
     denoms = sorted(set(denoms), reverse=True)
-    m = [0]
-    d = [0]
-    for a in range(1, amount + 1):
-        min_m = None
-        min_d = None
-        for d in denoms:
-            m_minus_d = m[a - d]
-            if min_m is None or m_minus_d < min_m:
-                min_m = m_minus_d
-                min_d = d
-        m.append(1 + min_m)
-        d.append(min_d)
+    mins = [0]
+    dens = [0]
+    for amt in range(1, amount + 1):
+        min_mins = None
+        min_dens = None
+        for den in denoms:
+            # Skip denominations larger than the current amount
+            if den > amt:
+                continue
+            m_minus_d = mins[amt - den]
+            if min_mins is None or m_minus_d < min_mins:
+                min_mins = m_minus_d
+                min_dens = den
+        mins.append(1 + min_mins)
+        dens.append(min_dens)
     # Convert to actual list of denominations
     chng = []
-    a_back = a
-    while a_back > 0:
-        coin = d[a_back]
-        chng.append[coin]
-        a_back -= coin
+    while amount > 0:
+        coin = dens[amount]
+        chng.append(coin)
+        amount -= coin
     return chng
+
+denoms_us = (1, 5, 10, 25, 50, 100)
+denoms_uk = (1, 2, 5, 10, 20, 50, 100, 200)
+denoms_euro = denoms_uk # Euros same as pounds
+denoms_fib = (1, 2, 3, 5, 8, 13, 21, 34, 55, 89)
+denoms_prev2_plus1 = (1, 2, 4, 7, 12, 20, 33, 54, 88)
+
+def print_change(denoms, max_amount=100):
+    for amount in range(max_amount + 1):
+        print(amount, ': ', change(denoms, amount), sep='')
