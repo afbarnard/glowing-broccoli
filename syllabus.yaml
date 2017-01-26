@@ -29,9 +29,13 @@ algorithms:
   non-comparison sort:
     how: programming
 
-  dynamic programming:
-    what: edit distance, sequence alignment, ?
+  dynamic programming: # edit distance, sequence alignment, ?
+    what: making change
     how: programming
+    where: src/problems.py:change
+    when: 2017-01-25
+    study time: 0:20
+    prog time: 0:15
 
   depth- and breadth-first search:
     how: programming
