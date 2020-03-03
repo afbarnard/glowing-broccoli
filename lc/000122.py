@@ -34,6 +34,37 @@
 # 7                          5  5
 # 8                             0
 
+# Well, it turns out that the following properties of sequences of
+# numbers can be taken advantage of to create an optimal method that
+# does not require dynamic programming.
+#
+# * A sequence of numbers is composed of consecutive subsequences that
+#   are either monotonically increasing or monotonically decreasing.
+#   The subsequences alternate between increasing and decreasing when
+#   considered to share end points.
+# * Extend increasing subsequences as far as possible in each direction
+#   maximizes the difference: Given a_i <= ... <= a_j <= ... <= a_k <=
+#   ... <= a_n, (a_n - a_i) >= (a_k - a_j) because a_n >= a_k and a_j >=
+#   a_i.
+# * The difference of a decreasing sequence is <= 0, so it is best to
+#   not buy or sell.
+# * Choosing from a decreasing sequence following an increasing sequence
+#   cannot increase the difference of the increasing sequence: Given a_i
+#   <= ... <= a_j >= ... >= a_k, (a_j - a_i) >= (a_k - a_i).
+# * Similarly, choosing a starting point in a decreasing sequence
+#   followed by an increasing sequence cannot increase the difference of
+#   the increasing sequence: Given a_i >= ... >= a_j <= ... <= a_k, (a_k
+#   - a_j) >= (a_k - a_i).
+# * In an increasing, decreasing, increasing scenario, it is always best
+#   to treat both increasing sequences separately.  Given a_i <= ... <=
+#   a_j >= ... >= a_k <= ... <= a_n, (a_j - a_i) + (a_n - a_k) >= (a_n -
+#   a_i) because a_j >= a_k.
+#
+# Together with inducution, these properties cover all possible
+# sequences of numbers and show that the maximum differences are
+# obtained from the maximal increasing subsequences which can be found
+# with a linear scan.
+
 
 # In a strategy, a buy is -1, a sell is 1, and a hold is 0.
 # Thus, the profit is the dot product of the strategy vector
@@ -179,4 +210,16 @@ class Solution:
     def maxProfit_4(self, prices: List[int]) -> int:
         return max_profit_dynprg_nonrec(prices)
 
-    maxProfit = maxProfit_4
+    def maxProfit_5(self, prices: List[int]) -> int:
+        if len(prices) < 2:
+            return 0
+        prft = 0
+        prices_iter = iter(prices)
+        prev_price = next(prices_iter)
+        for curr_price in prices_iter:
+            if curr_price > prev_price:
+                prft += curr_price - prev_price
+            prev_price = curr_price
+        return prft
+
+    maxProfit = maxProfit_5
