@@ -7,10 +7,11 @@
 #
 # These are my recollections on the types of exercises we had to do in
 # Scheme [2] for Intro CS at St. Olaf.  In accord with Scheme, all lists
-# are chains of (item, next) pairs, and no iteration is allowed.  Since
-# pairs are immutable in Scheme (and in Python), the following functions
-# must all work by building new lists out of the old lists.  There is no
-# such thing as modifying the list in place.
+# are chains of (item, next) pairs, where the empty list is (), and no
+# iteration is allowed.  Since pairs are immutable in Scheme (and in
+# Python), the following functions must all work by building new lists
+# out of the old lists.  There is no such thing as modifying the list in
+# place.
 #
 # [1] https://en.wikipedia.org/wiki/Tail_call
 # [2] https://en.wikipedia.org/wiki/Scheme_(programming_language)
@@ -60,7 +61,7 @@ def as_pairs(array):
     (item, next) pairs.  No iteration!
     """
     if len(array) == 0:
-        return None
+        return ()
     else:
         head = array[0]
         tail = as_pairs(array[1:])
@@ -69,7 +70,7 @@ def as_pairs(array):
 def as_pairs_iter(array):
     # Iterative implementation as a comparison for the tail-recursive
     # implementation
-    tail = None
+    tail = ()
     for index in range(len(array) - 1, -1, -1):
         head = array[index]
         tail = (head, tail)
@@ -80,19 +81,19 @@ def as_pairs_tr_seq(array):
     # Use a list to build up the items as a stack in reverse so that
     # they can be popped off in order.
     def backward_helper(stack, list):
-        if stack is None:
+        if stack == ():
             return list
         else:
             head, tail = stack
             return backward_helper(tail, (head, list))
     def forward_helper(array, stack):
         if len(array) == 0:
-            return backward_helper(stack, None)
+            return backward_helper(stack, ())
         else:
             head = array[0]
             tail = array[1:]
             return forward_helper(tail, (head, stack))
-    return forward_helper(array, None)
+    return forward_helper(array, ())
 
 def as_pairs_tr_ram(array):
     # Use random access properties to produce tail-recursive version of
@@ -102,14 +103,14 @@ def as_pairs_tr_ram(array):
             return list
         else:
             return helper(array, index - 1, (array[index], list))
-    return helper(array, len(array) - 1, None)
+    return helper(array, len(array) - 1, ())
 
 
 # Basic list queries
 
 def length(list):
     """Return the number of items in the list."""
-    if list is None:
+    if list == ():
         return 0
     else:
         _, tail = list
@@ -117,7 +118,7 @@ def length(list):
 
 def length_tr(list):
     def helper(length, list):
-        if list is None:
+        if list == ():
             return length
         else:
             _, tail = list
@@ -129,7 +130,7 @@ def contains_tr(list, item):
     Return whether the list contains the given item.  (Naturally
     tail-recursive.)
     """
-    if list is None:
+    if list == ():
         return False
     else:
         head, tail = list
@@ -143,7 +144,7 @@ def count_matches(list, item):
     Return the number of occurrences of the given item in the given
     list.
     """
-    if list is None:
+    if list == ():
         return 0
     else:
         head, tail = list
@@ -154,7 +155,7 @@ def count_matches(list, item):
 
 def count_matches_tr(list, item):
     def helper(list, item, count):
-        if list is None:
+        if list == ():
             return count
         else:
             head, tail = list
@@ -169,7 +170,7 @@ def minimum(ints):
     Return the minimum in a list of integers.  If the list is empty,
     return None.
     """
-    if ints is None:
+    if ints == ():
         return None
     else:
         head, tail = ints
@@ -181,7 +182,7 @@ def minimum(ints):
 
 def minimum_tr(ints):
     def helper(ints, min):
-        if ints is None:
+        if ints == ():
             return min
         else:
             head, tail = ints
@@ -193,7 +194,7 @@ def minimum_tr(ints):
 
 def sum(list):
     """Return the sum of all integers in the given list."""
-    if list is None:
+    if list == ():
         return 0
     else:
         head, tail = list
@@ -204,7 +205,7 @@ def sum(list):
 
 def sum_tr(list):
     def helper(list, sum):
-        if list is None:
+        if list == ():
             return sum
         else:
             head, tail = list
@@ -219,7 +220,7 @@ def get_tr(list, index):
     Return the item at the specified index.  If the index is out of
     bounds, return an IndexError.  (Naturally tail-recursive.)
     """
-    if list is None or index < 0:
+    if list == () or index < 0:
         return IndexError()
     else:
         head, tail = list
@@ -236,7 +237,7 @@ def find_first(list, key):
     Return the index of the first occurrence of the given key (if any).
     If the key does not occur, return None.
     """
-    if list is None:
+    if list == ():
         return None
     else:
         head, tail = list
@@ -257,7 +258,7 @@ def find_last(list, key):
     Return the index of the last occurrence of the given key (if any).
     If the key does not occur, return None.
     """
-    if list is None:
+    if list == ():
         return None
     else:
         head, tail = list
@@ -279,7 +280,7 @@ def find_nth(list, key, n):
     counting from 1.  If the key does not occur that many times, return
     None.
     """
-    if list is None or n < 1:
+    if list == () or n < 1:
         return None
     else:
         head, tail = list
@@ -552,9 +553,10 @@ class FibonacciTrTest(FibonacciRecTest):
 class AsPairsTest(unittest.TestCase):
 
     def _test_as_pairs(self, as_pairs_func):
-        self.assertEqual(None, as_pairs_func([]))
-        self.assertEqual(('a', None), as_pairs_func(['a']))
-        self.assertEqual((1, (2, (3, None))), as_pairs_func([1, 2, 3]))
+        self.assertEqual((), as_pairs_func([]))
+        self.assertEqual(('a', ()), as_pairs_func(['a']))
+        self.assertEqual((1, (2, (3, (4, (5, ()))))),
+                         as_pairs_func([1, 2, 3, 4, 5]))
 
     def test_as_pairs_rec(self):
         self._test_as_pairs(as_pairs)
