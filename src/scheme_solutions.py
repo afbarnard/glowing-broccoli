@@ -1,5 +1,6 @@
-# For practice, implement the following linked list operations as both
-# (plain) recursive and tail-recursive functions [1].  Use helper functions
+# For practice, implement the following linked list operations as
+# recursive functions.  If the name of a function ends in "_tr", its
+# implementation should be tail-recursive [1].  Use helper functions
 # where appropriate.  (Tail-recursive functions usually need helper
 # functions with additional arguments to carry along values before
 # returning them.)
@@ -25,7 +26,7 @@ def fibonacci_exp(n):
     elif n == 1:
         return 1
     else:
-        return fibonacci_exp(n - 1) + fibonacci_exp(n - 2)
+        return fibonacci_exp(n - 2) + fibonacci_exp(n - 1)
 
 def fibonacci_rec(n):
     def helper(n):
@@ -103,6 +104,9 @@ def as_pairs_tr_ram(array):
             return helper(array, index - 1, (array[index], list))
     return helper(array, len(array) - 1, None)
 
+
+# Basic list queries
+
 def length(list):
     """Return the number of items in the list."""
     if list is None:
@@ -120,39 +124,182 @@ def length_tr(list):
             return helper(length + 1, tail)
     return helper(0, list)
 
-def contains(list, item):
-    """Return whether the list contains the given item."""
-    pass
-
 def contains_tr(list, item):
-    pass
+    """
+    Return whether the list contains the given item.  (Naturally
+    tail-recursive.)
+    """
+    if list is None:
+        return False
+    else:
+        head, tail = list
+        if head == item:
+            return True
+        else:
+            return contains_tr(tail, item)
 
 def count_matches(list, item):
     """
     Return the number of occurrences of the given item in the given
     list.
     """
-    pass
+    if list is None:
+        return 0
+    else:
+        head, tail = list
+        if head == item:
+            return 1 + count_matches(tail, item)
+        else:
+            return count_matches(tail, item)
 
 def count_matches_tr(list, item):
-    pass
+    def helper(list, item, count):
+        if list is None:
+            return count
+        else:
+            head, tail = list
+            if head == item:
+                return helper(tail, item, count + 1)
+            else:
+                return helper(tail, item, count)
+    return helper(list, item, 0)
+
+def minimum(ints):
+    """
+    Return the minimum in a list of integers.  If the list is empty,
+    return None.
+    """
+    if ints is None:
+        return None
+    else:
+        head, tail = ints
+        min = minimum(tail)
+        if min is None or head <= min:
+            return head
+        else:
+            return min
+
+def minimum_tr(ints):
+    def helper(ints, min):
+        if ints is None:
+            return min
+        else:
+            head, tail = ints
+            if min is None or head < min:
+                return helper(tail, head)
+            else:
+                return helper(tail, min)
+    return helper(ints, None)
 
 def sum(list):
     """Return the sum of all integers in the given list."""
-    pass
+    if list is None:
+        return 0
+    else:
+        head, tail = list
+        if isinstance(head, int):
+            return head + sum(tail)
+        else:
+            return sum(tail)
 
 def sum_tr(list):
-    pass
-
-def get(list, index):
-    """
-    Return the item at the specified index.  If the index is out of
-    bounds, return an IndexError.
-    """
-    pass
+    def helper(list, sum):
+        if list is None:
+            return sum
+        else:
+            head, tail = list
+            if isinstance(head, int):
+                return helper(tail, sum + head)
+            else:
+                return helper(tail, sum)
+    return helper(list, 0)
 
 def get_tr(list, index):
+    """
+    Return the item at the specified index.  If the index is out of
+    bounds, return an IndexError.  (Naturally tail-recursive.)
+    """
+    if list is None or index < 0:
+        return IndexError()
+    else:
+        head, tail = list
+        if index == 0:
+            return head
+        else:
+            return get_tr(tail, index - 1)
+
+
+# Intermediate list queries
+
+def find_first(list, key):
+    """
+    Return the index of the first occurrence of the given key (if any).
+    If the key does not occur, return None.
+    """
+    if list is None:
+        return None
+    else:
+        head, tail = list
+        if head == key:
+            return 0
+        else:
+            idx = find_first(tail, key)
+            if idx is None:
+                return None
+            else:
+                return idx + 1
+
+def find_first_tr(list, key):
     pass
+
+def find_last(list, key):
+    """
+    Return the index of the last occurrence of the given key (if any).
+    If the key does not occur, return None.
+    """
+    if list is None:
+        return None
+    else:
+        head, tail = list
+        idx = find_last(tail, key)
+        if idx is None:
+            if head == key:
+                return 0
+            else:
+                return None
+        else:
+            return idx + 1
+
+def find_last_tr(list, key):
+    pass
+
+def find_nth(list, key, n):
+    """
+    Return the index of the n-th occurrence of the given key (if any),
+    counting from 1.  If the key does not occur that many times, return
+    None.
+    """
+    if list is None or n < 1:
+        return None
+    else:
+        head, tail = list
+        if head == key and n == 1:
+            return 0
+        else:
+            if head == key:
+                idx = find_nth(tail, key, n - 1)
+            else:
+                idx = find_nth(tail, key, n)
+            if idx is None:
+                return None
+            else:
+                return idx + 1
+
+def find_nth_tr(list, key, n):
+    pass
+
+
+# Basic list modifications
 
 def set(list, index, item):
     """
@@ -252,6 +399,9 @@ def reverse(list):
 def reverse_tr(list):
     pass
 
+
+# Slices and sublists
+
 def get_slice(list, lo, hi):
     """
     Return the sublist that starts at index `lo` and ends at index `hi`
@@ -289,6 +439,18 @@ def contains_sublist(list, sublist):
     pass
 
 
+# Sorting
+
+def insort_first(list, key):
+    pass
+
+def insort_last(list, key):
+    pass
+
+def merge_sort(list, compare=None):
+    pass
+
+
 # All right!  Now let's get fancy with nested lists.
 
 def count_nested_matches(list, key):
@@ -298,7 +460,7 @@ def count_nested_matches(list, key):
     """
     pass
 
-def minimum(list):
+def minimum_nested(list):
     """Return the minimum of the integers in the given list."""
     pass
 
@@ -407,7 +569,7 @@ class AsPairsTest(unittest.TestCase):
         self._test_as_pairs(as_pairs_tr_ram)
 
 
-class ListQueriesTest(unittest.TestCase):
+class BasicListQueriesTest(unittest.TestCase):
 
     def length_tests(self, length_func):
         as_pairs = as_pairs_iter
@@ -430,9 +592,6 @@ class ListQueriesTest(unittest.TestCase):
         self.assertEqual(True, contains_func(as_pairs([1]), 1))
         self.assertEqual(True, contains_func(as_pairs([0, 1, 2, 3, 4]), 4))
 
-    def test_contains(self):
-        self.contains_tests(contains)
-
     def test_contains_tr(self):
         self.contains_tests(contains_tr)
 
@@ -440,10 +599,10 @@ class ListQueriesTest(unittest.TestCase):
         as_pairs = as_pairs_iter
         self.assertEqual(0, count_matches_func(as_pairs([]), 1))
         self.assertEqual(0, count_matches_func(as_pairs([1]), 2))
-        self.assertEqual(0, contains_func(as_pairs([0, 1, 2, 3, 4]), 5))
-        self.assertEqual(1, contains_func(as_pairs([1]), 1))
-        self.assertEqual(3, contains_func(as_pairs([0, 1, 0, 1, 0]), 0))
-        self.assertEqual(111, contains_func(as_pairs([1] * 111), 1))
+        self.assertEqual(0, count_matches_func(as_pairs([0, 1, 2, 3, 4]), 5))
+        self.assertEqual(1, count_matches_func(as_pairs([1]), 1))
+        self.assertEqual(3, count_matches_func(as_pairs([0, 1, 0, 1, 0]), 0))
+        self.assertEqual(111, count_matches_func(as_pairs([1] * 111), 1))
 
     def test_count_matches(self):
         self.count_matches_tests(count_matches)
@@ -451,12 +610,34 @@ class ListQueriesTest(unittest.TestCase):
     def test_count_matches_tr(self):
         self.count_matches_tests(count_matches_tr)
 
+    def minimum_tests(self, minimum_func):
+        as_pairs = as_pairs_iter
+        self.assertEqual(None, minimum_func(as_pairs([])))
+        self.assertEqual(-13, minimum_func(as_pairs([-13])))
+        self.assertEqual(1, minimum_func(as_pairs([5, 4, 3, 2, 1])))
+        self.assertEqual(-5, minimum_func(as_pairs([-5, -4, -3, -2, -1])))
+        self.assertEqual(-3, minimum_func(as_pairs([5, 4, -3, -2, -1])))
+
+    def test_minimum(self):
+        self.minimum_tests(minimum)
+
+    def test_minimum_tr(self):
+        self.minimum_tests(minimum_tr)
+
     def sum_tests(self, sum_func):
         as_pairs = as_pairs_iter
+        # Zero from empty
         self.assertEqual(0, sum_func(as_pairs([])))
-        self.assertEqual(0, sum_func(as_pairs([0])))
+        # Zero from zeros
+        self.assertEqual(0, sum_func(as_pairs([0, 0, 0])))
+        # Zero from cancellation (include negative numbers!)
+        self.assertEqual(0, sum_func(as_pairs(
+            [4, 2, -5, -7, 2, 4, 7, 2, -8, -5, 4])))
+        # Single number
         self.assertEqual(2, sum_func(as_pairs([2])))
+        # Two numbers
         self.assertEqual(5, sum_func(as_pairs([2, 3])))
+        # Multiple numbers
         self.assertEqual(77, sum_func(as_pairs(
             [2, 3, 5, 7, 11, 13, 17, 19])))
 
@@ -469,18 +650,66 @@ class ListQueriesTest(unittest.TestCase):
     def get_tests(self, get_func):
         as_pairs = as_pairs_iter
         self.assertIsInstance(get_func(as_pairs([]), 0), IndexError)
+        self.assertIsInstance(get_func(as_pairs([1, 2, 3]), -1), IndexError)
+        self.assertIsInstance(get_func(as_pairs([1, 2, 3]), 3), IndexError)
         self.assertEqual(3, get_func(as_pairs([3]), 0))
         self.assertEqual(0, get_func(as_pairs([3, 2, 1, 0]), 3))
         self.assertEqual(2, get_func(as_pairs([5, 4, 3, 2, 1]), 3))
-
-    def test_get(self):
-        self.get_tests(get)
 
     def test_get_tr(self):
         self.get_tests(get_tr)
 
 
-class ListBasicModifyTest(unittest.TestCase):
+class IntermediateListQueriesTest(unittest.TestCase):
+
+    def find_first_tests(self, find_first_func):
+        as_pairs = as_pairs_iter
+        self.assertEqual(None, find_first_func(as_pairs([]), 3))
+        self.assertEqual(None, find_first_func(as_pairs([1]), 3))
+        self.assertEqual(None, find_first_func(as_pairs([2, 4, 6, 8]), 3))
+        self.assertEqual(0, find_first_func(as_pairs([3, 3, 3]), 3))
+        self.assertEqual(2, find_first_func(as_pairs([1, 2, 3]), 3))
+        self.assertEqual(1, find_first_func(as_pairs([1, 0, 0, 0, 1]), 0))
+
+    def test_find_first(self):
+        self.find_first_tests(find_first)
+
+    def test_find_first_tr(self):
+        self.find_first_tests(find_first_tr)
+
+    def find_last_tests(self, find_last_func):
+        as_pairs = as_pairs_iter
+        self.assertEqual(None, find_last_func(as_pairs([]), 3))
+        self.assertEqual(None, find_last_func(as_pairs([1]), 3))
+        self.assertEqual(None, find_last_func(as_pairs([2, 4, 6, 8]), 3))
+        self.assertEqual(2, find_last_func(as_pairs([3, 3, 3]), 3))
+        self.assertEqual(0, find_last_func(as_pairs([3, 2, 1]), 3))
+        self.assertEqual(3, find_last_func(as_pairs([1, 0, 0, 0, 1]), 0))
+
+    def test_find_last(self):
+        self.find_last_tests(find_last)
+
+    def test_find_last_tr(self):
+        self.find_last_tests(find_last_tr)
+
+    def find_nth_tests(self, find_nth_func):
+        as_pairs = as_pairs_iter
+        self.assertEqual(None, find_nth_func(as_pairs([]), 3, 1))
+        self.assertEqual(None, find_nth_func(as_pairs([1]), 3, 1))
+        self.assertEqual(None, find_nth_func(as_pairs([2, 4, 6]), 3, 1))
+        self.assertEqual(0, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 1))
+        self.assertEqual(2, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 3))
+        self.assertEqual(4, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 5))
+        self.assertEqual(None, find_nth_func(as_pairs([3, 3, 3, 3]), 3, 5))
+
+    def test_find_nth(self):
+        self.find_nth_tests(find_nth)
+
+    def test_find_nth_tr(self):
+        self.find_nth_tests(find_nth_tr)
+
+
+class BasicListModificationsTest(unittest.TestCase):
 
     def set_tests(self, set_func):
         as_pairs = as_pairs_iter
