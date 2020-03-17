@@ -16,6 +16,11 @@
 # [1] https://en.wikipedia.org/wiki/Tail_call
 # [2] https://en.wikipedia.org/wiki/Scheme_(programming_language)
 
+# Copyright (c) 2020 Aubrey Barnard.
+#
+# This is free, open software licensed under the [MIT License](
+# https://choosealicense.com/licenses/mit/).
+
 
 # A classic, non-list function to start, Fibonacci!  Here, implement the
 # naïve, exponentially recursive version, a linear complexity recursive
