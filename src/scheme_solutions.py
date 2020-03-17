@@ -462,52 +462,109 @@ def find_nth_tr(list, key, n):
 def set(list, index, item):
     """
     Return a list with the item at the specified index replaced with the
-    given item.  If the index is out of bounds, return an IndexError.
+    given item.  If the index is out of bounds, return the list unmodified.
     """
-    pass
+    if list == () or index < 0:
+        return list
+    else:
+        head, tail = list
+        if index == 0:
+            return (item, tail)
+        else:
+            return (head, set(tail, index - 1, item))
 
 def insert_at(list, index, item):
     """
     Return a list with the given item inserted at the given index.  If
-    the index is out of bounds and not just one past the end, return an
-    IndexError.
+    the index is out of bounds and not just one past the end, return the
+    list unmodified.
     """
-    pass
+    if index == 0:
+        return (item, list)
+    elif list == () or index < 0:
+        return list
+    else:
+        head, tail = list
+        return (head, insert_at(tail, index - 1, item))
 
 def delete_at(list, index):
     """
     Return a list with the item at the given index deleted.  If the
-    index is out of bounds, return an IndexError.
+    index is out of bounds, return the list unmodified.
     """
-    pass
+    if list == () or index < 0:
+        return list
+    else:
+        head, tail = list
+        if index == 0:
+            return tail
+        else:
+            return (head, delete_at(tail, index - 1))
 
 def insert_before(list, new, key):
     """
     Return a list with the new item inserted before the first occurrence
     of the key (if any).
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        if head == key:
+            return (new, list)
+        else:
+            return (head, insert_before(tail, new, key))
 
 def delete_before(list, key):
     """
     Return a list with the the item before the first occurrence of the
     key (if any) deleted.
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head1, tail1 = list
+        if tail1 == ():
+            return list
+        else:
+            head2, tail2 = tail1
+            if head2 == key:
+                return tail1
+            else:
+                return (head1, delete_before(tail1, key))
 
 def insert_after(list, new, key):
     """
     Return a list with the new item inserted after the first occurrence
     of the key (if any).
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        if head == key:
+            return (head, (new, tail))
+        else:
+            return (head, insert_after(tail, new, key))
 
 def delete_after(list, key):
     """
     Return a list with the item after the first occurrence of the key
     (if any) deleted.
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head1, tail1 = list
+        if head1 == key:
+            # Leave out the next item, if any
+            if tail1 == ():
+                return list
+            else:
+                head2, tail2 = tail1
+                return (head1, tail2)
+        else:
+            return (head1, delete_after(tail1, key))
 
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTest
 
@@ -922,12 +979,15 @@ class IntermediateListQueriesTrTest(_IntermediateListQueriesTests):
 class _IntermediateListModificationsTests(unittest.TestCase):
 
     def set_tests(self, set_func):
-        self.assertIsInstance(set_func(as_pairs([]), 0, 'a'), IndexError)
         self.assertEqual(as_pairs([2]), set_func(as_pairs([3]), 0, 2))
         self.assertEqual(as_pairs([3, 2, 1, 11]),
                          set_func(as_pairs([3, 2, 1, 0]), 3, 11))
         self.assertEqual(as_pairs([5, 4, 3, 'b', 1]),
-                         get_func(as_pairs([5, 4, 3, 2, 1]), 3, 'b'))
+                         set_func(as_pairs([5, 4, 3, 2, 1]), 3, 'b'))
+        self.assertEqual(as_pairs([]),
+                         set_func(as_pairs([]), 0, 'a'))
+        self.assertEqual(as_pairs([1, 2, 3]),
+                         set_func(as_pairs([1, 2, 3]), -1, 0))
 
     def insert_at_tests(self, insert_at_func):
         self.assertEqual(as_pairs([7]), insert_at_func(as_pairs([]), 0, 7))
@@ -937,7 +997,10 @@ class _IntermediateListModificationsTests(unittest.TestCase):
                          insert_at_func(as_pairs([1, 2, 3]), 3, 4))
         self.assertEqual(as_pairs([1, 2, 4, 3]),
                          insert_at_func(as_pairs([1, 2, 3]), 2, 4))
-        self.assertIsInstance(insert_at_func(as_pairs([0, 1]), 3, 'a'), IndexError)
+        self.assertEqual(as_pairs([0, 1]),
+                         insert_at_func(as_pairs([0, 1]), 3, 'a'))
+        self.assertEqual(as_pairs([0, 1]),
+                         insert_at_func(as_pairs([0, 1]), -1, 'a'))
 
     def delete_at_tests(self, delete_at_func):
         self.assertEqual(as_pairs([]), delete_at_func(as_pairs([7]), 0))
@@ -947,46 +1010,94 @@ class _IntermediateListModificationsTests(unittest.TestCase):
                          delete_at_func(as_pairs([4, 3, 2, 1]), 3))
         self.assertEqual(as_pairs([4, 2, 1]),
                          delete_at_func(as_pairs([4, 3, 2, 1]), 1))
-        self.assertIsInstance(delete_at_func(as_pairs([0, 1]), 2), IndexError)
+        self.assertEqual(as_pairs([0, 1]),
+                         delete_at_func(as_pairs([0, 1]), 2))
 
     def insert_before_tests(self, insert_before_func):
-        self.assertEqual(as_pairs(''), insert_before_func(as_pairs(''), 'a', 'b'))
-        self.assertEqual(as_pairs('ab'), insert_before_func(as_pairs('b'), 'a', 'b'))
-        self.assertEqual(as_pairs('abdcabc'),
-                         insert_before_func(as_pairs('abcabc'), 'c', 'd'))
-        self.assertEqual(as_pairs('abcde'),
-                         insert_before_func(as_pairs('abce'), 'd', 'e'))
-        self.assertEqual(as_pairs('abcde'),
-                         insert_before_func(as_pairs('abcde'), 'e', 'f'))
+        # Empty
+        self.assertEqual(as_pairs(''),
+                         insert_before_func(as_pairs(''), 'z', 'a'))
+        # Insert before first
+        self.assertEqual(as_pairs('zabc'),
+                         insert_before_func(as_pairs('abc'), 'z', 'a'))
+        # Insert before middle
+        self.assertEqual(as_pairs('azbc'),
+                         insert_before_func(as_pairs('abc'), 'z', 'b'))
+        # Insert before last
+        self.assertEqual(as_pairs('abzc'),
+                         insert_before_func(as_pairs('abc'), 'z', 'c'))
+        # Key not found
+        self.assertEqual(as_pairs('abc'),
+                         insert_before_func(as_pairs('abc'), 'z', 'd'))
+        # Insert before first of multiple
+        self.assertEqual(as_pairs('brook'),
+                         insert_before_func(as_pairs('book'), 'r', 'o'))
 
     def delete_before_tests(self, delete_before_func):
-        self.assertEqual(as_pairs(''), delete_before_func(as_pairs(''), 'a'))
-        self.assertEqual(as_pairs('a'), delete_before_func(as_pairs('ba'), 'a'))
-        self.assertEqual(as_pairs('ba'), delete_before_func(as_pairs('ba'), 'b'))
-        self.assertEqual(as_pairs('abcabc'),
-                         delete_before_func(as_pairs('abcabc'), 'd'))
-        self.assertEqual(as_pairs('acabc'),
-                         delete_before_func(as_pairs('abcabc'), 'c'))
+        # Delete from empty
+        self.assertEqual(as_pairs(''),
+                         delete_before_func(as_pairs(''), 'a'))
+        # Delete before beginning
+        self.assertEqual(as_pairs('abcde'),
+                         delete_before_func(as_pairs('abcde'), 'a'))
+        # Delete at beginning
+        self.assertEqual(as_pairs('bcde'),
+                         delete_before_func(as_pairs('abcde'), 'b'))
+        # Delete from middle
+        self.assertEqual(as_pairs('abde'),
+                         delete_before_func(as_pairs('abcde'), 'd'))
+        # Delete at end
+        self.assertEqual(as_pairs('abce'),
+                         delete_before_func(as_pairs('abcde'), 'e'))
+        # Key not found
+        self.assertEqual(as_pairs('abcde'),
+                         delete_before_func(as_pairs('abcde'), 'f'))
+        # Delete before first when multiple
+        self.assertEqual(as_pairs('baba'),
+                         delete_before_func(as_pairs('ababa'), 'b'))
 
     def insert_after_tests(self, insert_after_func):
-        self.assertEqual(as_pairs(''), insert_after_func(as_pairs(''), 'a', 'b'))
-        self.assertEqual(as_pairs('aba'), insert_after_func(as_pairs('b'), 'a', 'b'))
-        self.assertEqual(as_pairs('abcabc'),
-                         insert_after_func(as_pairs('abcabc'), 'c', 'd'))
-        self.assertEqual(as_pairs('abcdcba'),
-                         insert_after_func(as_pairs('abcdcba'), 'd', 'c'))
+        # Empty
+        self.assertEqual(as_pairs(''),
+                         insert_after_func(as_pairs(''), 'z', 'a'))
+        # Insert after first
+        self.assertEqual(as_pairs('azbc'),
+                         insert_after_func(as_pairs('abc'), 'z', 'a'))
+        # Insert after middle
+        self.assertEqual(as_pairs('abzc'),
+                         insert_after_func(as_pairs('abc'), 'z', 'b'))
+        # Insert after last
+        self.assertEqual(as_pairs('abcz'),
+                         insert_after_func(as_pairs('abc'), 'z', 'c'))
+        # Key not found
+        self.assertEqual(as_pairs('abc'),
+                         insert_after_func(as_pairs('abc'), 'z', 'd'))
+        # Insert after first of multiple
+        self.assertEqual(as_pairs('bozo'),
+                         insert_after_func(as_pairs('boo'), 'z', 'o'))
 
     def delete_after_tests(self, delete_after_func):
-        self.assertEqual(as_pairs(''), delete_after_func(as_pairs(''), 'a'))
-        self.assertEqual(as_pairs('ab'), delete_after_func(as_pairs('abc'), 'b'))
-        self.assertEqual(as_pairs('abab'),
-                         delete_after_func(as_pairs('babab'), 'a'))
-        self.assertEqual(as_pairs('abab'),
-                         delete_after_func(as_pairs('abcab'), 'b'))
-        self.assertEqual(as_pairs('abcde'),
-                         delete_after_func(as_pairs('abcde'), 'f'))
+        # Delete from empty
+        self.assertEqual(as_pairs(''),
+                         delete_after_func(as_pairs(''), 'a'))
+        # Delete at beginning
+        self.assertEqual(as_pairs('acde'),
+                         delete_after_func(as_pairs('abcde'), 'a'))
+        # Delete from middle
+        self.assertEqual(as_pairs('abde'),
+                         delete_after_func(as_pairs('abcde'), 'b'))
+        # Delete at end
+        self.assertEqual(as_pairs('abcd'),
+                         delete_after_func(as_pairs('abcde'), 'd'))
+        # Delete after end
         self.assertEqual(as_pairs('abcde'),
                          delete_after_func(as_pairs('abcde'), 'e'))
+        # Key not found
+        self.assertEqual(as_pairs('abcde'),
+                         delete_after_func(as_pairs('abcde'), 'f'))
+        # Delete after first when multiple
+        self.assertEqual(as_pairs('abba'),
+                         delete_after_func(as_pairs('ababa'), 'b'))
 
 
 class IntermediateListModificationsTest(_IntermediateListModificationsTests):
