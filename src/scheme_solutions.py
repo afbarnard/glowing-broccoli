@@ -176,7 +176,7 @@ def as_pairs_tr_seq(iterable):
 as_pairs = as_pairs_iter
 
 
-# Chapter 3: Basic list queries
+# Chapter 3.1: Basic list queries
 
 def length(list):
     """Return the number of items in the list."""
@@ -185,15 +185,6 @@ def length(list):
     else:
         _, tail = list
         return 1 + length(tail)
-
-def length_tr(list):
-    def helper(length, list):
-        if list == ():
-            return length
-        else:
-            _, tail = list
-            return helper(length + 1, tail)
-    return helper(0, list)
 
 def contains_tr(list, item):
     """
@@ -223,18 +214,6 @@ def count_matches(list, item):
         else:
             return count_matches(tail, item)
 
-def count_matches_tr(list, item):
-    def helper(list, item, count):
-        if list == ():
-            return count
-        else:
-            head, tail = list
-            if head == item:
-                return helper(tail, item, count + 1)
-            else:
-                return helper(tail, item, count)
-    return helper(list, item, 0)
-
 def minimum(ints):
     """
     Return the minimum in a list of integers.  If the list is empty,
@@ -250,18 +229,6 @@ def minimum(ints):
         else:
             return min
 
-def minimum_tr(ints):
-    def helper(ints, min):
-        if ints == ():
-            return min
-        else:
-            head, tail = ints
-            if min is None or head < min:
-                return helper(tail, head)
-            else:
-                return helper(tail, min)
-    return helper(ints, None)
-
 def sum(list):
     """Return the sum of all integers in the given list."""
     if list == ():
@@ -272,18 +239,6 @@ def sum(list):
             return head + sum(tail)
         else:
             return sum(tail)
-
-def sum_tr(list):
-    def helper(list, sum):
-        if list == ():
-            return sum
-        else:
-            head, tail = list
-            if isinstance(head, int):
-                return helper(tail, sum + head)
-            else:
-                return helper(tail, sum)
-    return helper(list, 0)
 
 def get_tr(list, index):
     """
@@ -302,7 +257,130 @@ def get_tr(list, index):
 # Check with: python3 -m unittest scheme_exercises.BasicListQueriesTest
 
 
-# Chapter 4: Intermediate list queries
+# Chapter 3.2: Basic list queries, tail-recursive and alternate versions
+
+def length_tr(list):
+    def helper(length, list):
+        if list == ():
+            return length
+        else:
+            _, tail = list
+            return helper(length + 1, tail)
+    return helper(0, list)
+
+def count_matches_tr(list, item):
+    def helper(list, item, count):
+        if list == ():
+            return count
+        else:
+            head, tail = list
+            if head == item:
+                return helper(tail, item, count + 1)
+            else:
+                return helper(tail, item, count)
+    return helper(list, item, 0)
+
+def minimum_tr(ints):
+    def helper(ints, min):
+        if ints == ():
+            return min
+        else:
+            head, tail = ints
+            if min is None or head < min:
+                return helper(tail, head)
+            else:
+                return helper(tail, min)
+    return helper(ints, None)
+
+def sum_tr(list):
+    def helper(list, sum):
+        if list == ():
+            return sum
+        else:
+            head, tail = list
+            if isinstance(head, int):
+                return helper(tail, sum + head)
+            else:
+                return helper(tail, sum)
+    return helper(list, 0)
+
+# Check with: python3 -m unittest scheme_exercises.BasicListQueriesTrTest
+
+
+# Chapter 4.1: Basic list modifications
+
+def prepend(list, item):
+    """
+    Return a list with the given item added at the beginning.  (Not
+    recursive.)
+    """
+    return (item, list)
+
+def append(list, item):
+    """Return a list with the given item added to the end."""
+    if list == ():
+        return (item, ())
+    else:
+        head, tail = list
+        return (head, append(tail, item))
+
+def extend(list1, list2):
+    """Return a list with the given list added to the end."""
+    if list1 == ():
+        return list2
+    else:
+        head, tail = list1
+        return (head, extend(tail, list2))
+
+def delete_all(list, key):
+    """Return a list with all occurrences of the given key deleted."""
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        if head == key:
+            return delete_all(tail, key)
+        else:
+            return (head, delete_all(tail, key))
+
+def reverse_tr(list):
+    """
+    Return a list containing the given items in reverse order.
+    (Naturally tail-recursive.)
+    """
+    def helper(list, revrsd):
+        if list == ():
+            return revrsd
+        else:
+            head, tail = list
+            return helper(tail, (head, revrsd))
+    return helper(list, ())
+
+# Check with: python3 -m unittest scheme_exercises.BasicListModificationsTest
+
+
+# Chapter 4.2: Basic list modifications, tail-recursive and alternate  versions
+
+def append_tr(list, item):
+    pass
+
+def extend_tr(list1, list2):
+    pass
+
+def delete_all_tr(list, key):
+    pass
+
+def reverse_nontr(list):
+    """
+    The easiest and best solution is naturally tail-recursive.  As a
+    challenge, implement a non-tail-recursive version.
+    """
+    pass
+
+# Check with: python3 -m unittest scheme_exercises.BasicListModificationsTrTest
+
+
+# Chapter 5.1: Intermediate list queries
 
 def find_first(list, key):
     """
@@ -322,9 +400,6 @@ def find_first(list, key):
             else:
                 return idx + 1
 
-def find_first_tr(list, key):
-    pass
-
 def find_last(list, key):
     """
     Return the index of the last occurrence of the given key (if any).
@@ -342,9 +417,6 @@ def find_last(list, key):
                 return None
         else:
             return idx + 1
-
-def find_last_tr(list, key):
-    pass
 
 def find_nth(list, key, n):
     """
@@ -368,87 +440,30 @@ def find_nth(list, key, n):
             else:
                 return idx + 1
 
-def find_nth_tr(list, key, n):
-    pass
-
 # Check with: python3 -m unittest scheme_exercises.IntermediateListQueriesTest
 
 
-# Chapter 5: Basic list modifications
+# Chapter 5.2: Intermediate list queries, tail-recursive and alternate versions
 
-def prepend(list, item):
-    """
-    Return a list with the given item added at the beginning.  (Not
-    recursive.)
-    """
-    return (item, list)
-
-def append(list, item):
-    """Return a list with the given item added to the end."""
-    if list == ():
-        return (item, ())
-    else:
-        head, tail = list
-        return (head, append(tail, item))
-
-def append_tr(list, item):
+def find_first_tr(list, key):
     pass
 
-def extend(list1, list2):
-    """Return a list with the given list added to the end."""
-    if list1 == ():
-        return list2
-    else:
-        head, tail = list1
-        return (head, extend(tail, list2))
-
-def extend_tr(list1, list2):
+def find_last_tr(list, key):
     pass
 
-def delete_all(list, key):
-    """Return a list with all occurrences of the given key deleted."""
-    if list == ():
-        return ()
-    else:
-        head, tail = list
-        if head == key:
-            return delete_all(tail, key)
-        else:
-            return (head, delete_all(tail, key))
-
-def delete_all_tr(list, key):
+def find_nth_tr(list, key, n):
     pass
 
-def reverse(list):
-    """
-    Return a list containing the given items in reverse order.
-    (Naturally tail-recursive, but implement this anyway as a
-    challenge.)
-    """
-    pass
-
-def reverse_tr(list):
-    def helper(list, revrsd):
-        if list == ():
-            return revrsd
-        else:
-            head, tail = list
-            return helper(tail, (head, revrsd))
-    return helper(list, ())
-
-# Check with: python3 -m unittest scheme_exercises.BasicListModificationsTest
+# Check with: python3 -m unittest scheme_exercises.IntermediateListQueriesTrTest
 
 
-# Chapter 6: Intermediate list modifications
+# Chapter 6.1: Intermediate list modifications
 
 def set(list, index, item):
     """
     Return a list with the item at the specified index replaced with the
     given item.  If the index is out of bounds, return an IndexError.
     """
-    pass
-
-def set_tr(list, index, item):
     pass
 
 def insert_at(list, index, item):
@@ -459,17 +474,11 @@ def insert_at(list, index, item):
     """
     pass
 
-def insert_at_tr(list, index, item):
-    pass
-
 def delete_at(list, index):
     """
     Return a list with the item at the given index deleted.  If the
     index is out of bounds, return an IndexError.
     """
-    pass
-
-def delete_at_tr(list, index):
     pass
 
 def insert_before(list, new, key):
@@ -479,17 +488,11 @@ def insert_before(list, new, key):
     """
     pass
 
-def insert_before_tr(list, new, key):
-    pass
-
 def delete_before(list, key):
     """
     Return a list with the the item before the first occurrence of the
     key (if any) deleted.
     """
-    pass
-
-def delete_before_tr(list, key):
     pass
 
 def insert_after(list, new, key):
@@ -499,9 +502,6 @@ def insert_after(list, new, key):
     """
     pass
 
-def insert_after_tr(list, new, key):
-    pass
-
 def delete_after(list, key):
     """
     Return a list with the item after the first occurrence of the key
@@ -509,10 +509,33 @@ def delete_after(list, key):
     """
     pass
 
+# Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTest
+
+
+# Chapter 6.2: Intermediate list modifications, tail-recursive and alternate versions
+
+def set_tr(list, index, item):
+    pass
+
+def insert_at_tr(list, index, item):
+    pass
+
+def delete_at_tr(list, index):
+    pass
+
+def insert_before_tr(list, new, key):
+    pass
+
+def delete_before_tr(list, key):
+    pass
+
+def insert_after_tr(list, new, key):
+    pass
+
 def delete_after_tr(list, key):
     pass
 
-# Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTest
+# Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
 
 # Chapter 7: Slices and sublists
@@ -688,7 +711,7 @@ class AsPairsTest(unittest.TestCase):
         self._test_as_pairs(as_pairs_tr_ram)
 
 
-class BasicListQueriesTest(unittest.TestCase):
+class _BasicListQueriesTests(unittest.TestCase):
 
     def length_tests(self, length_func):
         self.assertEqual(0, length_func(as_pairs([])))
@@ -696,21 +719,12 @@ class BasicListQueriesTest(unittest.TestCase):
         self.assertEqual(2, length_func(as_pairs(['baa', 'baa'])))
         self.assertEqual(10, length_func(as_pairs(list(range(100, 110)))))
 
-    def test_length(self):
-        self.length_tests(length)
-
-    def test_length_tr(self):
-        self.length_tests(length_tr)
-
     def contains_tests(self, contains_func):
         self.assertEqual(False, contains_func(as_pairs([]), 1))
         self.assertEqual(False, contains_func(as_pairs([1]), 2))
         self.assertEqual(False, contains_func(as_pairs([0, 1, 2, 3, 4]), 5))
         self.assertEqual(True, contains_func(as_pairs([1]), 1))
         self.assertEqual(True, contains_func(as_pairs([0, 1, 2, 3, 4]), 4))
-
-    def test_contains_tr(self):
-        self.contains_tests(contains_tr)
 
     def count_matches_tests(self, count_matches_func):
         self.assertEqual(0, count_matches_func(as_pairs([]), 1))
@@ -720,24 +734,12 @@ class BasicListQueriesTest(unittest.TestCase):
         self.assertEqual(3, count_matches_func(as_pairs([0, 1, 0, 1, 0]), 0))
         self.assertEqual(111, count_matches_func(as_pairs([1] * 111), 1))
 
-    def test_count_matches(self):
-        self.count_matches_tests(count_matches)
-
-    def test_count_matches_tr(self):
-        self.count_matches_tests(count_matches_tr)
-
     def minimum_tests(self, minimum_func):
         self.assertEqual(None, minimum_func(as_pairs([])))
         self.assertEqual(-13, minimum_func(as_pairs([-13])))
         self.assertEqual(1, minimum_func(as_pairs([5, 4, 3, 2, 1])))
         self.assertEqual(-5, minimum_func(as_pairs([-5, -4, -3, -2, -1])))
         self.assertEqual(-3, minimum_func(as_pairs([5, 4, -3, -2, -1])))
-
-    def test_minimum(self):
-        self.minimum_tests(minimum)
-
-    def test_minimum_tr(self):
-        self.minimum_tests(minimum_tr)
 
     def sum_tests(self, sum_func):
         # Zero from empty
@@ -755,12 +757,6 @@ class BasicListQueriesTest(unittest.TestCase):
         self.assertEqual(77, sum_func(as_pairs(
             [2, 3, 5, 7, 11, 13, 17, 19])))
 
-    def test_sum(self):
-        self.sum_tests(sum)
-
-    def test_sum_tr(self):
-        self.sum_tests(sum_tr)
-
     def get_tests(self, get_func):
         self.assertIsInstance(get_func(as_pairs([]), 0), IndexError)
         self.assertIsInstance(get_func(as_pairs([1, 2, 3]), -1), IndexError)
@@ -769,61 +765,44 @@ class BasicListQueriesTest(unittest.TestCase):
         self.assertEqual(0, get_func(as_pairs([3, 2, 1, 0]), 3))
         self.assertEqual(2, get_func(as_pairs([5, 4, 3, 2, 1]), 3))
 
+
+class BasicListQueriesTest(_BasicListQueriesTests):
+
+    def test_length(self):
+        self.length_tests(length)
+
+    def test_contains_tr(self):
+        self.contains_tests(contains_tr)
+
+    def test_count_matches(self):
+        self.count_matches_tests(count_matches)
+
+    def test_minimum(self):
+        self.minimum_tests(minimum)
+
+    def test_sum(self):
+        self.sum_tests(sum)
+
     def test_get_tr(self):
         self.get_tests(get_tr)
 
 
-class IntermediateListQueriesTest(unittest.TestCase):
+class BasicListQueriesTrTest(_BasicListQueriesTests):
 
-    def find_first_tests(self, find_first_func):
-        self.assertEqual(None, find_first_func(as_pairs([]), 3))
-        self.assertEqual(None, find_first_func(as_pairs([1]), 3))
-        self.assertEqual(None, find_first_func(as_pairs([2, 4, 6, 8]), 3))
-        self.assertEqual(0, find_first_func(as_pairs([3, 3, 3]), 3))
-        self.assertEqual(2, find_first_func(as_pairs([1, 2, 3]), 3))
-        self.assertEqual(1, find_first_func(as_pairs([1, 0, 0, 0, 1]), 0))
+    def test_length_tr(self):
+        self.length_tests(length_tr)
 
-    def test_find_first(self):
-        self.find_first_tests(find_first)
+    def test_count_matches_tr(self):
+        self.count_matches_tests(count_matches_tr)
 
-    def test_find_first_tr(self):
-        self.find_first_tests(find_first_tr)
+    def test_minimum_tr(self):
+        self.minimum_tests(minimum_tr)
 
-    def find_last_tests(self, find_last_func):
-        self.assertEqual(None, find_last_func(as_pairs([]), 3))
-        self.assertEqual(None, find_last_func(as_pairs([1]), 3))
-        self.assertEqual(None, find_last_func(as_pairs([2, 4, 6, 8]), 3))
-        self.assertEqual(2, find_last_func(as_pairs([3, 3, 3]), 3))
-        self.assertEqual(0, find_last_func(as_pairs([3, 2, 1]), 3))
-        self.assertEqual(3, find_last_func(as_pairs([1, 0, 0, 0, 1]), 0))
-
-    def test_find_last(self):
-        self.find_last_tests(find_last)
-
-    def test_find_last_tr(self):
-        self.find_last_tests(find_last_tr)
-
-    def find_nth_tests(self, find_nth_func):
-        self.assertEqual(None, find_nth_func(as_pairs([]), 3, 1))
-        self.assertEqual(None, find_nth_func(as_pairs([1]), 3, 1))
-        self.assertEqual(None, find_nth_func(as_pairs([2, 4, 6]), 3, 1))
-        self.assertEqual(0, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 1))
-        self.assertEqual(2, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 3))
-        self.assertEqual(4, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 5))
-        self.assertEqual(None, find_nth_func(as_pairs([3, 3, 3, 3]), 3, 5))
-
-    def test_find_nth(self):
-        self.find_nth_tests(find_nth)
-
-    def test_find_nth_tr(self):
-        self.find_nth_tests(find_nth_tr)
+    def test_sum_tr(self):
+        self.sum_tests(sum_tr)
 
 
-class BasicListModificationsTest(unittest.TestCase):
-
-    def test_prepend(self):
-        self.assertEqual(as_pairs([1]), prepend(as_pairs([]), 1))
-        self.assertEqual(as_pairs([1, 2, 3]), prepend(as_pairs([2, 3]), 1))
+class _BasicListModificationsTests(unittest.TestCase):
 
     def append_tests(self, append_func):
         self.assertEqual(as_pairs([0]), append_func(as_pairs([]), 0))
@@ -831,24 +810,12 @@ class BasicListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs([3, 4, 1, 2]),
                          append_func(as_pairs([3, 4, 1]), 2))
 
-    def test_append(self):
-        self.append_tests(append)
-
-    def test_append_tr(self):
-        self.append_tests(append_tr)
-
     def extend_tests(self, extend_func):
         self.assertEqual(as_pairs([]), extend_func(as_pairs([]), as_pairs([])))
         self.assertEqual(as_pairs([0]), extend_func(as_pairs([0]), as_pairs([])))
         self.assertEqual(as_pairs([1]), extend_func(as_pairs([]), as_pairs([1])))
         self.assertEqual(as_pairs([3, 4, 1, 2]),
                          extend_func(as_pairs([3, 4]), as_pairs([1, 2])))
-
-    def test_extend(self):
-        self.extend_tests(extend)
-
-    def test_extend_tr(self):
-        self.extend_tests(extend_tr)
 
     def delete_all_tests(self, delete_all_func):
         self.assertEqual(as_pairs(''), delete_all_func(as_pairs(''), 'a'))
@@ -860,25 +827,99 @@ class BasicListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs('banana'),
                          delete_all_func(as_pairs('banana'), 'c'))
 
-    def test_delete_all(self):
-        self.delete_all_tests(delete_all)
-
-    def test_delete_all_tr(self):
-        self.delete_all_tests(delete_all_tr)
-
     def reverse_tests(self, reverse_func):
         self.assertEqual(as_pairs(''), reverse_func(as_pairs('')))
         self.assertEqual(as_pairs('a'), reverse_func(as_pairs('a')))
         self.assertEqual(as_pairs('tacocat'), reverse_func(as_pairs('tacocat')))
 
-    def test_reverse(self):
-        self.reverse_tests(reverse)
+
+class BasicListModificationsTest(_BasicListModificationsTests):
+
+    def test_prepend(self):
+        self.assertEqual(as_pairs([1]), prepend(as_pairs([]), 1))
+        self.assertEqual(as_pairs([1, 2, 3]), prepend(as_pairs([2, 3]), 1))
+
+    def test_append(self):
+        self.append_tests(append)
+
+    def test_extend(self):
+        self.extend_tests(extend)
+
+    def test_delete_all(self):
+        self.delete_all_tests(delete_all)
 
     def test_reverse_tr(self):
         self.reverse_tests(reverse_tr)
 
 
-class IntermediateListModificationsTest(unittest.TestCase):
+class BasicListModificationsTrTest(_BasicListModificationsTests):
+
+    def test_append_tr(self):
+        self.append_tests(append_tr)
+
+    def test_extend_tr(self):
+        self.extend_tests(extend_tr)
+
+    def test_delete_all_tr(self):
+        self.delete_all_tests(delete_all_tr)
+
+    def test_reverse_nontr(self):
+        self.reverse_tests(reverse_nontr)
+
+
+class _IntermediateListQueriesTests(unittest.TestCase):
+
+    def find_first_tests(self, find_first_func):
+        self.assertEqual(None, find_first_func(as_pairs([]), 3))
+        self.assertEqual(None, find_first_func(as_pairs([1]), 3))
+        self.assertEqual(None, find_first_func(as_pairs([2, 4, 6, 8]), 3))
+        self.assertEqual(0, find_first_func(as_pairs([3, 3, 3]), 3))
+        self.assertEqual(2, find_first_func(as_pairs([1, 2, 3]), 3))
+        self.assertEqual(1, find_first_func(as_pairs([1, 0, 0, 0, 1]), 0))
+
+    def find_last_tests(self, find_last_func):
+        self.assertEqual(None, find_last_func(as_pairs([]), 3))
+        self.assertEqual(None, find_last_func(as_pairs([1]), 3))
+        self.assertEqual(None, find_last_func(as_pairs([2, 4, 6, 8]), 3))
+        self.assertEqual(2, find_last_func(as_pairs([3, 3, 3]), 3))
+        self.assertEqual(0, find_last_func(as_pairs([3, 2, 1]), 3))
+        self.assertEqual(3, find_last_func(as_pairs([1, 0, 0, 0, 1]), 0))
+
+    def find_nth_tests(self, find_nth_func):
+        self.assertEqual(None, find_nth_func(as_pairs([]), 3, 1))
+        self.assertEqual(None, find_nth_func(as_pairs([1]), 3, 1))
+        self.assertEqual(None, find_nth_func(as_pairs([2, 4, 6]), 3, 1))
+        self.assertEqual(0, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 1))
+        self.assertEqual(2, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 3))
+        self.assertEqual(4, find_nth_func(as_pairs([3, 3, 3, 3, 3]), 3, 5))
+        self.assertEqual(None, find_nth_func(as_pairs([3, 3, 3, 3]), 3, 5))
+
+
+class IntermediateListQueriesTest(_IntermediateListQueriesTests):
+
+    def test_find_first(self):
+        self.find_first_tests(find_first)
+
+    def test_find_last(self):
+        self.find_last_tests(find_last)
+
+    def test_find_nth(self):
+        self.find_nth_tests(find_nth)
+
+
+class IntermediateListQueriesTrTest(_IntermediateListQueriesTests):
+
+    def test_find_first_tr(self):
+        self.find_first_tests(find_first_tr)
+
+    def test_find_last_tr(self):
+        self.find_last_tests(find_last_tr)
+
+    def test_find_nth_tr(self):
+        self.find_nth_tests(find_nth_tr)
+
+
+class _IntermediateListModificationsTests(unittest.TestCase):
 
     def set_tests(self, set_func):
         self.assertIsInstance(set_func(as_pairs([]), 0, 'a'), IndexError)
@@ -887,12 +928,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
                          set_func(as_pairs([3, 2, 1, 0]), 3, 11))
         self.assertEqual(as_pairs([5, 4, 3, 'b', 1]),
                          get_func(as_pairs([5, 4, 3, 2, 1]), 3, 'b'))
-
-    def test_set(self):
-        self.set_tests(set)
-
-    def test_set_tr(self):
-        self.set_tests(set_tr)
 
     def insert_at_tests(self, insert_at_func):
         self.assertEqual(as_pairs([7]), insert_at_func(as_pairs([]), 0, 7))
@@ -904,12 +939,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
                          insert_at_func(as_pairs([1, 2, 3]), 2, 4))
         self.assertIsInstance(insert_at_func(as_pairs([0, 1]), 3, 'a'), IndexError)
 
-    def test_insert_at(self):
-        self.insert_at_tests(insert_at)
-
-    def test_insert_at_tr(self):
-        self.insert_at_tests(insert_at_tr)
-
     def delete_at_tests(self, delete_at_func):
         self.assertEqual(as_pairs([]), delete_at_func(as_pairs([7]), 0))
         self.assertEqual(as_pairs([3, 2, 1]),
@@ -919,12 +948,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs([4, 2, 1]),
                          delete_at_func(as_pairs([4, 3, 2, 1]), 1))
         self.assertIsInstance(delete_at_func(as_pairs([0, 1]), 2), IndexError)
-
-    def test_delete_at(self):
-        self.delete_at_tests(delete_at)
-
-    def test_delete_at_tr(self):
-        self.delete_at_tests(delete_at_tr)
 
     def insert_before_tests(self, insert_before_func):
         self.assertEqual(as_pairs(''), insert_before_func(as_pairs(''), 'a', 'b'))
@@ -936,12 +959,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs('abcde'),
                          insert_before_func(as_pairs('abcde'), 'e', 'f'))
 
-    def test_insert_before(self):
-        self.insert_before_tests(insert_before)
-
-    def test_insert_before_tr(self):
-        self.insert_before_tests(insert_before_tr)
-
     def delete_before_tests(self, delete_before_func):
         self.assertEqual(as_pairs(''), delete_before_func(as_pairs(''), 'a'))
         self.assertEqual(as_pairs('a'), delete_before_func(as_pairs('ba'), 'a'))
@@ -951,12 +968,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs('acabc'),
                          delete_before_func(as_pairs('abcabc'), 'c'))
 
-    def test_delete_before(self):
-        self.delete_before_tests(delete_before)
-
-    def test_delete_before_tr(self):
-        self.delete_before_tests(delete_before_tr)
-
     def insert_after_tests(self, insert_after_func):
         self.assertEqual(as_pairs(''), insert_after_func(as_pairs(''), 'a', 'b'))
         self.assertEqual(as_pairs('aba'), insert_after_func(as_pairs('b'), 'a', 'b'))
@@ -964,12 +975,6 @@ class IntermediateListModificationsTest(unittest.TestCase):
                          insert_after_func(as_pairs('abcabc'), 'c', 'd'))
         self.assertEqual(as_pairs('abcdcba'),
                          insert_after_func(as_pairs('abcdcba'), 'd', 'c'))
-
-    def test_insert_after(self):
-        self.insert_after_tests(insert_after)
-
-    def test_insert_after_tr(self):
-        self.insert_after_tests(insert_after_tr)
 
     def delete_after_tests(self, delete_after_func):
         self.assertEqual(as_pairs(''), delete_after_func(as_pairs(''), 'a'))
@@ -983,16 +988,50 @@ class IntermediateListModificationsTest(unittest.TestCase):
         self.assertEqual(as_pairs('abcde'),
                          delete_after_func(as_pairs('abcde'), 'e'))
 
+
+class IntermediateListModificationsTest(_IntermediateListModificationsTests):
+
+    def test_set(self):
+        self.set_tests(set)
+
+    def test_insert_at(self):
+        self.insert_at_tests(insert_at)
+
+    def test_delete_at(self):
+        self.delete_at_tests(delete_at)
+
+    def test_insert_before(self):
+        self.insert_before_tests(insert_before)
+
+    def test_delete_before(self):
+        self.delete_before_tests(delete_before)
+
+    def test_insert_after(self):
+        self.insert_after_tests(insert_after)
+
     def test_delete_after(self):
         self.delete_after_tests(delete_after)
 
+
+class IntermediateListModificationsTrTest(_IntermediateListModificationsTests):
+
+    def test_set_tr(self):
+        self.set_tests(set_tr)
+
+    def test_insert_at_tr(self):
+        self.insert_at_tests(insert_at_tr)
+
+    def test_delete_at_tr(self):
+        self.delete_at_tests(delete_at_tr)
+
+    def test_insert_before_tr(self):
+        self.insert_before_tests(insert_before_tr)
+
+    def test_delete_before_tr(self):
+        self.delete_before_tests(delete_before_tr)
+
+    def test_insert_after_tr(self):
+        self.insert_after_tests(insert_after_tr)
+
     def test_delete_after_tr(self):
         self.delete_after_tests(delete_after_tr)
-
-
-class ListMultiModifyTest(unittest.TestCase):
-    pass
-
-
-class NestedListsTest(unittest.TestCase):
-    pass
