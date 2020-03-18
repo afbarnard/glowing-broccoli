@@ -511,6 +511,7 @@ def find_first_tr(list, key):
     return helper(list, 0, key)
 
 def find_last_tr(list, key):
+    """Hint: Use two helper functions."""
     def forward_helper(list, stack, length, key):
         if list == ():
             return backward_helper(stack, length - 1, key)
@@ -772,7 +773,7 @@ def delete_after_tr(list, key):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
 
-# Chapter 7: Slices and sublists
+# Chapter 7: Slices and sublists (TODO)
 
 def get_slice(list, lo, hi):
     """
@@ -811,7 +812,7 @@ def contains_sublist(list, sublist):
     pass
 
 
-# Chapter 8: Sorting
+# Chapter 8: Sorting (TODO)
 
 def insort_first(list, key):
     pass
@@ -823,7 +824,7 @@ def merge_sort(list, compare=None):
     pass
 
 
-# Chapter 9: Nested lists
+# Chapter 9: Nested lists (TODO)
 
 def count_nested_matches(list, key):
     """
