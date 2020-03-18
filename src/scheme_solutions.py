@@ -155,12 +155,6 @@ def as_pairs_tr_ram(array):
 def as_pairs_tr_seq(iterable):
     # Use a list to build up the items as a stack in reverse so that
     # they can be popped off in order.
-    def backward_helper(stack, list):
-        if stack == ():
-            return list
-        else:
-            head, tail = stack
-            return backward_helper(tail, (head, list))
     def forward_helper(iterable, stack):
         itr = iter(iterable)
         head = next(itr, itr)
@@ -168,6 +162,12 @@ def as_pairs_tr_seq(iterable):
             return backward_helper(stack, ())
         else:
             return forward_helper(itr, (head, stack))
+    def backward_helper(stack, list):
+        if stack == ():
+            return list
+        else:
+            head, tail = stack
+            return backward_helper(tail, (head, list))
     return forward_helper(iterable, ())
 
 # Check with: python3 -m unittest scheme_exercises.AsPairsTest
@@ -496,16 +496,52 @@ def find_nth(list, key, n):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListQueriesTest
 
 
-# Chapter 5.2: Intermediate list queries, tail-recursive and alternate versions
+# Chapter 5.2: Intermediate list queries, tail-recursive versions
 
 def find_first_tr(list, key):
-    pass
+    def helper(list, index, key):
+        if list == ():
+            return None
+        else:
+            head, tail = list
+            if head == key:
+                return index
+            else:
+                return helper(tail, index + 1, key)
+    return helper(list, 0, key)
 
 def find_last_tr(list, key):
-    pass
+    def forward_helper(list, stack, length, key):
+        if list == ():
+            return backward_helper(stack, length - 1, key)
+        else:
+            head, tail = list
+            return forward_helper(tail, (head, stack), length + 1, key)
+    def backward_helper(stack, index, key):
+        if stack == ():
+            return None
+        else:
+            head, tail = stack
+            if head == key:
+                return index
+            else:
+                return backward_helper(tail, index - 1, key)
+    return forward_helper(list, (), 0, key)
 
 def find_nth_tr(list, key, n):
-    pass
+    def helper(list, index, n, key):
+        if list == ():
+            return None
+        else:
+            head, tail = list
+            if head == key:
+                if n == 1:
+                    return index
+                else:
+                    return helper(tail, index + 1, n - 1, key)
+            else:
+                return helper(tail, index + 1, n, key)
+    return helper(list, 0, n, key)
 
 # Check with: python3 -m unittest scheme_exercises.IntermediateListQueriesTrTest
 
