@@ -419,7 +419,7 @@ def delete_all_tr(list, key):
 def reverse_nontr(list):
     """
     The easiest and best solution is naturally tail-recursive.  As a
-    challenge, implement a non-tail-recursive version.  (Hint: use
+    challenge, implement a non-tail-recursive version.  (Hint: Use
     `append`.)  What is the computational complexity compared to
     `reverse_tr`?
     """
@@ -658,28 +658,116 @@ def delete_after(list, key):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTest
 
 
-# Chapter 6.2: Intermediate list modifications, tail-recursive and alternate versions
+# Chapter 6.2: Intermediate list modifications, tail-recursive versions
+
+# Hint: Implement the following helper function.
+def prepend_all(stack, list):
+    """
+    Prepend all of the items in the given stack onto the head of the
+    given list.  (Naturally tail-recursive.)
+
+    For example:
+
+        prepend_all((3, (2, (1, ()))), (4, (5, ()))) ->
+            (1, (2, (3, (4, (5, ())))))
+    """
+    if stack == ():
+        return list
+    else:
+        head, tail = stack
+        return prepend_all(tail, (head, list))
 
 def set_tr(list, index, item):
-    pass
+    def helper(seen_stack, rest_list, index, item):
+        if rest_list == () or index < 0:
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if index == 0:
+                return prepend_all(seen_stack, (item, tail))
+            else:
+                return helper((head, seen_stack), tail, index - 1, item)
+    return helper((), list, index, item)
 
 def insert_at_tr(list, index, item):
-    pass
+    def helper(seen_stack, rest_list, index, item):
+        if index == 0:
+            return prepend_all(seen_stack, (item, rest_list))
+        elif rest_list == () or index < 0:
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            return helper((head, seen_stack), tail, index - 1, item)
+    return helper((), list, index, item)
 
 def delete_at_tr(list, index):
-    pass
+    def helper(seen_stack, rest_list, index):
+        if rest_list == () or index < 0:
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if index == 0:
+                return prepend_all(seen_stack, tail)
+            else:
+                return helper((head, seen_stack), tail, index - 1)
+    return helper((), list, index)
 
 def insert_before_tr(list, new, key):
-    pass
+    def helper(seen_stack, rest_list, new, key):
+        if rest_list == ():
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if head == key:
+                return prepend_all(seen_stack, (new, rest_list))
+            else:
+                return helper((head, seen_stack), tail, new, key)
+    return helper((), list, new, key)
 
 def delete_before_tr(list, key):
-    pass
+    def helper(seen_stack, rest_list, key):
+        if rest_list == ():
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if head == key:
+                if seen_stack == ():
+                    return rest_list
+                else:
+                    # Get rid of the previous item
+                    _, seen_stack = seen_stack
+                    return prepend_all(seen_stack, rest_list)
+            else:
+                return helper((head, seen_stack), tail, key)
+    return helper((), list, key)
 
 def insert_after_tr(list, new, key):
-    pass
+    def helper(seen_stack, rest_list, new, key):
+        if rest_list == ():
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if head == key:
+                return prepend_all(seen_stack, (head, (new, tail)))
+            else:
+                return helper((head, seen_stack), tail, new, key)
+    return helper((), list, new, key)
 
 def delete_after_tr(list, key):
-    pass
+    def helper(seen_stack, rest_list, key):
+        if rest_list == ():
+            return prepend_all(seen_stack, rest_list)
+        else:
+            head, tail = rest_list
+            if seen_stack == ():
+                return helper((head, seen_stack), tail, key)
+            else:
+                prev, _ = seen_stack
+                if prev == key:
+                    return prepend_all(seen_stack, tail)
+                else:
+                    return helper((head, seen_stack), tail, key)
+    return helper((), list, key)
 
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
