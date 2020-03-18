@@ -257,7 +257,7 @@ def get_tr(list, index):
 # Check with: python3 -m unittest scheme_exercises.BasicListQueriesTest
 
 
-# Chapter 3.2: Basic list queries, tail-recursive and alternate versions
+# Chapter 3.2: Basic list queries, tail-recursive versions
 
 def length_tr(list):
     def helper(length, list):
@@ -359,23 +359,76 @@ def reverse_tr(list):
 # Check with: python3 -m unittest scheme_exercises.BasicListModificationsTest
 
 
-# Chapter 4.2: Basic list modifications, tail-recursive and alternate  versions
+# Chapter 4.2: Basic list modifications, tail-recursive and alternate versions
+
+# All Scheme-like linked lists need to be constructed back to front.
+# Normally, returning from recursive calls and popping up through the
+# call stack provides the mechanism to accomplish this.  Since
+# tail-recursive solutions cannot use this mechanism [*], they have to
+# provide their own way(s) to construct the expected lists.
+#
+# [*] Properly tail-recursive languages reuse the top stack frame for a
+# tail call rather than pushing a new stack frame.  That means tail
+# recursion in such languages is essentially iteration, not recursion!
+# But it also means there aren't any new stack frames to pop and so
+# functions can't use the call stack as a mechanism for organizing data
+# / execution.
+#
+# The goal with the following exercises is to experiment with the
+# tail-recursive approach and experience its benefits / limitations.
+#
+# Hint: Use `reverse`!
+
+reverse = reverse_tr
 
 def append_tr(list, item):
-    pass
+    # Solution illustrating reverse last
+    def helper(list, stack, item):
+        if list == ():
+            return reverse((item, stack))
+        else:
+            head, tail = list
+            return helper(tail, (head, stack), item)
+    return helper(list, (), item)
+
+def append_tr(list, item):
+    # Solution illustrating reverse first
+    return reverse((item, reverse(list)))
 
 def extend_tr(list1, list2):
-    pass
+    def helper(src_list, dst_list):
+        if src_list == ():
+            return dst_list
+        else:
+            head, tail = src_list
+            return helper(tail, (head, dst_list))
+    return helper(reverse(list1), list2)
 
 def delete_all_tr(list, key):
-    pass
+    def helper(src_list, dst_list, key):
+        if src_list == ():
+            return dst_list
+        else:
+            head, tail = src_list
+            if head == key:
+                return helper(tail, dst_list, key)
+            else:
+                return helper(tail, (head, dst_list), key)
+    return helper(reverse(list), (), key)
 
 def reverse_nontr(list):
     """
     The easiest and best solution is naturally tail-recursive.  As a
-    challenge, implement a non-tail-recursive version.
+    challenge, implement a non-tail-recursive version.  (Hint: use
+    `append`.)  What is the computational complexity compared to
+    `reverse_tr`?
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        revrsd = reverse_nontr(tail)
+        return append(revrsd, head)
 
 # Check with: python3 -m unittest scheme_exercises.BasicListModificationsTrTest
 
