@@ -175,6 +175,15 @@ def as_pairs_tr_seq(iterable):
 # Just use the iterative version from now on
 as_pairs = as_pairs_iter
 
+# Note that, from now on, lists will be written with Python syntax for
+# clarity and convenience, but that syntax will actually represent
+# linked lists consisting of (item, next) pairs.  This is the way Scheme
+# operates: `[1, 2, 3]` is actually just syntactic sugar for `(1, (2,
+# (3, ())))`.  Thus, if you want to try out your code, remember to pass
+# all Python "arrays" through `as_pairs` first.  For example,
+# `length([1, 2, 3, 4])` represents the actual Python code
+# `length(as_pairs([1, 2, 3, 4]))`.
+
 
 # Chapter 3.1: Basic list queries
 
@@ -669,8 +678,7 @@ def prepend_all(stack, list):
 
     For example:
 
-        prepend_all((3, (2, (1, ()))), (4, (5, ()))) ->
-            (1, (2, (3, (4, (5, ())))))
+        prepend_all([3, 2, 1], [4, 5]) -> [1, 2, 3, 4, 5]
     """
     if stack == ():
         return list
@@ -773,42 +781,123 @@ def delete_after_tr(list, key):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
 
-# Chapter 7: Slices and sublists (TODO)
+# Chapter 7: Sublists (TODO)
 
-def get_slice(list, lo, hi):
+def sublist_at(list, index, length):
     """
-    Return the sublist that starts at index `lo` and ends at index `hi`
-    (inclusive).
-    """
-    pass
+    Return the sublist that starts at the given index and has the given
+    length.  If the index is out of bounds, return an empty list.  If
+    the length is too long, return only as many item as exist starting
+    at `index`.
 
-def set_slice(list1, lo, hi, list2):
-    """
-    Return a list that contains the given list in place of the indicated
-    slice (`lo` and `hi` are inclusive).
-    """
-    pass
+    For example:
 
-def insert_slice(list):
-    pass
-
-def delete_slice(list, lo, hi):
+        get_sublist([1, 2, 3, 4, 5], 2, 2) -> [3, 4]
+        get_sublist([1, 2, 3, 4, 5], 4, 2) -> [5]
+        get_sublist([1, 2, 3, 4, 5], 6, 2) -> []
     """
-    Return a list that omits the given slice (`lo` and `hi` are
-    inclusive indices).
+    if list == () or index < 0 or length <= 0:
+        return ()
+    else:
+        head, tail = list
+        if index == 0:
+            return (head, sublist_at(tail, index, length - 1))
+        else:
+            return sublist_at(tail, index - 1, length)
+
+def delete_sublist_at(list, index, length):
     """
-    pass
+    Return a list that omits the sublist that starts at the given index
+    and has the given length.  If the index is out of bounds, return the
+    list unmodified.  If the length is too long, delete only as many
+    items as exist starting at `index`.
+    """
+    if list == () or index < 0 or length <= 0:
+        return list
+    else:
+        head, tail = list
+        if index == 0:
+            return delete_sublist_at(tail, index, length - 1)
+        else:
+            return (head, delete_sublist_at(tail, index - 1, length))
 
-def get_all(list, indices):
-    """Return a sublist assembled from the items at the given indices."""
-    pass
+def insert_sublist_at(list, index, sublist):
+    """
+    Return the given list with the given sublist inserted at the given
+    index.  If the index is one past the end, append the sublist.  If
+    the index is otherwise out of bounds, return the list unmodified.
+    """
+    if index == 0:
+        if sublist == ():
+            return list
+        else:
+            subhead, subtail = sublist
+            return (subhead, insert_sublist_at(list, index, subtail))
+    elif list == ():
+        return ()
+    else:
+        head, tail = list
+        return (head, insert_sublist_at(tail, index - 1, sublist))
 
-def del_all(list, indices):
-    """Delete all the items at the given indices."""
-    pass
+def replace_sublist_at(list, index, length, sublist):
+    """
+    Return a list that contains the given sublist in place of the
+    existing sublist that starts at the given index and has the given
+    length.  If the index is one past the end, append the sublist.  If
+    the index is otherwise out of bounds, return the list unmodified.
+    If the length is too long, replace as many items as exist starting
+    at `index`.
+    """
+    if index == 0:
+        if list == ():
+            return sublist
+        elif length == 0:
+            if sublist == ():
+                return list
+            else:
+                head, tail = sublist
+                return (head, replace_sublist_at(list, 0, 0, tail))
+        else:
+            _, tail = list
+            return replace_sublist_at(tail, index, length - 1, sublist)
+    elif list == () or index < 0 or length < 0:
+        return list
+    else:
+        head, tail = list
+        return (head, replace_sublist_at(tail, index - 1, length, sublist))
 
 def contains_sublist(list, sublist):
     """Return whether the given list contains the given sublist."""
+    def heads_match(list, sublist):
+        if sublist == ():
+            return True
+        elif list == ():
+            return False
+        else:
+            head, tail = list
+            subhead, subtail = sublist
+            if head == subhead:
+                return heads_match(tail, subtail)
+            else:
+                return False
+    if sublist == ():
+        return True
+    elif list == ():
+        return False
+    else:
+        match = heads_match(list, sublist)
+        if match:
+            return True
+        else:
+            head, tail = list
+            return contains_sublist(tail, sublist)
+
+def select_all(list, indices):
+    """Return a sublist assembled from the items at the given indices."""
+    pass
+
+def remove_all(list, indices):
+    """Remove all the items at the given indices."""
     pass
 
 
@@ -818,6 +907,9 @@ def insort_first(list, key):
     pass
 
 def insort_last(list, key):
+    pass
+
+def insertion_sort(list):
     pass
 
 def merge_sort(list, compare=None):
@@ -1324,3 +1416,107 @@ class IntermediateListModificationsTrTest(_IntermediateListModificationsTests):
 
     def test_delete_after_tr(self):
         self.delete_after_tests(delete_after_tr)
+
+
+class SublistsTest(unittest.TestCase):
+
+    def test_sublist_at(self):
+        # Empty list
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs(''), 0, 1))
+        # Zero length
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 0, 0))
+        # Bad length
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 1, -1))
+        # Sliding window (includes indices out of bounds)
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), -1, 2))
+        self.assertEqual(as_pairs('12'), sublist_at(as_pairs('123'), 0, 2))
+        self.assertEqual(as_pairs('23'), sublist_at(as_pairs('123'), 1, 2))
+        self.assertEqual(as_pairs('3'), sublist_at(as_pairs('123'), 2, 2))
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 3, 2))
+        # Whole list
+        self.assertEqual(as_pairs('123'), sublist_at(as_pairs('123'), 0, 3))
+
+    def delete_sublist_at_tests(self, dlt):
+        # Empty list
+        self.assertEqual(as_pairs(''), dlt(as_pairs(''), 0, 1))
+        # Zero length
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 0, 0))
+        # Bad length
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 1, -1))
+        # Sliding window (includes indices out of bounds)
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), -1, 2))
+        self.assertEqual(as_pairs('3'), dlt(as_pairs('123'), 0, 2))
+        self.assertEqual(as_pairs('1'), dlt(as_pairs('123'), 1, 2))
+        self.assertEqual(as_pairs('12'), dlt(as_pairs('123'), 2, 2))
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 3, 2))
+        # Whole list
+        self.assertEqual(as_pairs(''), dlt(as_pairs('123'), 0, 3))
+
+    def test_delete_sublist_at(self):
+        self.delete_sublist_at_tests(delete_sublist_at)
+
+    def insert_sublist_at_tests(self, ins):
+        # Empty lists
+        self.assertEqual(as_pairs(''), ins(as_pairs(''), 0, as_pairs('')))
+        self.assertEqual(as_pairs('x'), ins(as_pairs(''), 0, as_pairs('x')))
+        self.assertEqual(as_pairs('a'), ins(as_pairs('a'), 0, as_pairs('')))
+        # Insert at beginning
+        self.assertEqual(as_pairs('xyabc'), ins(as_pairs('abc'), 0, as_pairs('xy')))
+        # Insert in middle
+        self.assertEqual(as_pairs('abxyc'), ins(as_pairs('abc'), 2, as_pairs('xy')))
+        # Insert at end
+        self.assertEqual(as_pairs('abcxy'), ins(as_pairs('abc'), 3, as_pairs('xy')))
+        # Indices out of bounds
+        self.assertEqual(as_pairs('abc'), ins(as_pairs('abc'), -1, as_pairs('xy')))
+        self.assertEqual(as_pairs('abc'), ins(as_pairs('abc'), 4, as_pairs('xy')))
+
+    def test_insert_sublist_at(self):
+        self.insert_sublist_at_tests(insert_sublist_at)
+
+    def test_replace_sublist_at(self):
+        rpl = replace_sublist_at
+        # Do deletion tests
+        self.delete_sublist_at_tests(lambda l, i, s: rpl(l, i, s, ()))
+        # Do insertion tests
+        self.insert_sublist_at_tests(lambda l, i, s: rpl(l, i, 0, s))
+        # Replace at beginning
+        self.assertEqual(as_pairs('xyz2345'),
+                         rpl(as_pairs('12345'), 0, 1, as_pairs('xyz')))
+        self.assertEqual(as_pairs('xyz45'),
+                         rpl(as_pairs('12345'), 0, 3, as_pairs('xyz')))
+        self.assertEqual(as_pairs('xyz'),
+                         rpl(as_pairs('12345'), 0, 5, as_pairs('xyz')))
+        # Replace in middle
+        self.assertEqual(as_pairs('1xyz5'),
+                         rpl(as_pairs('12345'), 1, 3, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12xyz45'),
+                         rpl(as_pairs('12345'), 2, 1, as_pairs('xyz')))
+        # Replace at end
+        self.assertEqual(as_pairs('12xyz'),
+                         rpl(as_pairs('12345'), 2, 4, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12345xyz'),
+                         rpl(as_pairs('12345'), 5, 3, as_pairs('xyz')))
+        # Indices out of bounds
+        self.assertEqual(as_pairs('12345'),
+                         rpl(as_pairs('12345'), -1, 5, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12345'),
+                         rpl(as_pairs('12345'), 6, 6, as_pairs('xyz')))
+
+    def test_contains_sublist(self):
+        ctn = contains_sublist
+        # Empty doesn't contain anything except empty
+        self.assertEqual(False, ctn(as_pairs(''), as_pairs('xyz')))
+        self.assertEqual(True, ctn(as_pairs(''), as_pairs('')))
+        # Everything contains empty
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('')))
+        # Sublist length 1
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('a')))
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('c')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('x')))
+        # Sublist length 2
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('ab')))
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('bc')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('ac')))
+        # Contains self
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('abc')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('abcd')))
