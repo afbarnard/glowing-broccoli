@@ -900,20 +900,132 @@ def remove_all(list, indices):
     """Remove all the items at the given indices."""
     pass
 
+def split(list, index):
+    """
+    Split the given list into two sublists at the given index and return
+    both sublists.  The first sublist should contain items at index 0
+    through `index - 1`, and the second sublist should contain the items
+    at index `index` through the end.  If the given index is too high,
+    return `(list, ())`.
+    """
+    if index <= 0:
+        return ((), list)
+    elif list == ():
+        return ((), ())
+    else:
+        head, tail = list
+        sub1, sub2 = split(tail, index - 1)
+        return ((head, sub1), sub2)
 
-# Chapter 8: Sorting (TODO)
+
+# Chapter 8: Sorting
+
+def extract_minimum(list):
+    """
+    Extract the minimum from the given list of integers and return it
+    and the rest of the list as a pair.  If the list is empty, the
+    minimum is None.  If the minimum is not unique, extract its first
+    occurrence.
+
+    For example:
+
+        extract_minimum([]) -> (None, [])
+        extract_minimum([3, 4, 6, 5, 4]) -> (4, [3, 6, 5, 4])
+    """
+    def helper(list, index, minimum, index_min):
+        if list == ():
+            return (minimum, index_min, ())
+        else:
+            head, tail = list
+            if minimum is None or head < minimum:
+                min, idx, new_tail = helper(tail, index + 1, head, index)
+            else:
+                min, idx, new_tail = helper(tail, index + 1, minimum, index_min)
+            if index == idx:
+                return (min, idx, new_tail)
+            else:
+                return (min, idx, (head, new_tail))
+    min, idx, tail = helper(list, 0, None, 0)
+    return (min, tail)
+
+def selection_sort(list):
+    """
+    Sort the given list and return it.  Use the selection sort
+    algorithm: Extract the minimum, put it at the front, and recur on
+    the rest.  Write a stable implementation.
+    """
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        if tail == ():
+            return list
+        else:
+            min, tail = extract_minimum(list)
+            sorted_tail = selection_sort(tail)
+            return (min, sorted_tail)
 
 def insort_first(list, key):
-    pass
-
-def insort_last(list, key):
-    pass
+    """
+    Insert the given key at its earliest position in sorted order.
+    Return the resulting list.
+    """
+    if list == ():
+        return (key, ())
+    else:
+        head, tail = list
+        if key <= head:
+            return (key, list)
+        else:
+            return (head, insort_first(tail, key))
 
 def insertion_sort(list):
-    pass
+    """
+    Sort the given list and return it.  Use the insertion sort
+    algorithm: Starting from a sorted list, insert the next element into
+    it, and repeat until the whole list is sorted.  Write a stable
+    implementation.
+    """
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        sorted = insertion_sort(tail)
+        return insort_first(sorted, head)
 
-def merge_sort(list, compare=None):
-    pass
+def merge(sorted1, sorted2):
+    """Merge two sorted lists into a single sorted list."""
+    if sorted1 == ():
+        return sorted2
+    elif sorted2 == ():
+        return sorted1
+    else:
+        h1, t1 = sorted1
+        h2, t2 = sorted2
+        if h1 <= h2:
+            return (h1, merge(t1, sorted2))
+        else:
+            return (h2, merge(sorted1, t2))
+
+def merge_sort(list):
+    """
+    Sort the given list and return it.  Use the merge sort algorithm:
+    Split the list into two halves, sort the first half, sort the second
+    half, then merge the two halves.  Write a stable implementation.
+    """
+    # Textbook version
+    if list == ():
+        return ()
+    else:
+        length = length_tr(list)
+        if length == 1:
+            return list
+        else:
+            mid = length // 2 + length % 2
+            sub1, sub2 = split(list, mid)
+            sorted1 = merge_sort(sub1)
+            sorted2 = merge_sort(sub2)
+            return merge(sorted1, sorted2)
 
 
 # Chapter 9: Nested lists (TODO)
@@ -1520,3 +1632,92 @@ class SublistsTest(unittest.TestCase):
         # Contains self
         self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('abc')))
         self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('abcd')))
+
+    def test_split(self):
+        self.assertEqual((as_pairs([]), as_pairs([])),
+                         split(as_pairs([]), 1))
+        self.assertEqual((as_pairs([]), as_pairs([1, 2, 3])),
+                         split(as_pairs([1, 2, 3]), 0))
+        self.assertEqual((as_pairs([1, 2, 3]), as_pairs([])),
+                         split(as_pairs([1, 2, 3]), 3))
+        self.assertEqual((as_pairs([1]), as_pairs([2, 3, 4, 5])),
+                         split(as_pairs([1, 2, 3, 4, 5]), 1))
+        self.assertEqual((as_pairs([1, 2, 3, 4]), as_pairs([5])),
+                         split(as_pairs([1, 2, 3, 4, 5]), 4))
+
+
+class SortingTest(unittest.TestCase):
+
+    def test_extract_minimum(self):
+        self.assertEqual(as_pairs([None]), extract_minimum(as_pairs([])))
+        self.assertEqual(as_pairs([4]), extract_minimum(as_pairs([4])))
+        self.assertEqual(as_pairs([-4, 8]), extract_minimum(as_pairs([-4, 8])))
+        self.assertEqual(as_pairs([-4, 8]), extract_minimum(as_pairs([8, -4])))
+        self.assertEqual(as_pairs([1, 2, 2]), extract_minimum(as_pairs([2, 1, 2])))
+        self.assertEqual(as_pairs([-7, 4, 4, -4, 2, 1, 4, -7]),
+                         extract_minimum(as_pairs([4, 4, -4, 2, 1, -7, 4, -7])))
+
+    def sort_tests(self, sort_func):
+        self.assertEqual(as_pairs([]), sort_func(as_pairs([])))
+        self.assertEqual(as_pairs([1]), sort_func(as_pairs([1])))
+        self.assertEqual(as_pairs([-3, -2, -1]),
+                         sort_func(as_pairs([-3, -2, -1])))
+        self.assertEqual(as_pairs([1, 2, 3, 4, 5]),
+                         sort_func(as_pairs([5, 4, 3, 2, 1])))
+        self.assertEqual(as_pairs([0, 1, 1, 1, 1, 1, 1]),
+                         sort_func(as_pairs([1, 1, 1, 1, 1, 1, 0])))
+        self.assertEqual(
+            as_pairs(
+                [-9, -7, -7, -7, -4, -3, -2, 0, 1, 2, 6, 6, 7, 7, 8, 9, 9]),
+            sort_func(as_pairs(
+                [9, 7, -4, 2, -9, 9, 7, 0, 8, -3, 6, -7, -2, -7, 1, -7, 6])))
+
+    def test_selection_sort(self):
+        self.sort_tests(selection_sort)
+
+    def test_insort_first(self):
+        self.assertEqual(as_pairs([0]), insort_first(as_pairs([]), 0))
+        self.assertEqual(as_pairs([0, 0]), insort_first(as_pairs([0]), 0))
+        self.assertEqual(as_pairs([0, 1]), insort_first(as_pairs([0]), 1))
+        self.assertEqual(as_pairs([0, 1]), insort_first(as_pairs([1]), 0))
+        # Insort at beginning
+        self.assertEqual(as_pairs([-4, -4, -3, 0, 1, 3, 4, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), -4))
+        self.assertEqual(as_pairs([-4, -3, -3, 0, 1, 3, 4, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), -3))
+        # Insort at end
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 7, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 7))
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 8, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 8))
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 8, 9]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 9))
+
+    def test_insertion_sort(self):
+        self.sort_tests(insertion_sort)
+
+    def test_merge(self):
+        self.assertEqual(as_pairs([]), merge(as_pairs([]), as_pairs([])))
+        self.assertEqual(as_pairs([0]), merge(as_pairs([0]), as_pairs([])))
+        self.assertEqual(as_pairs([0]), merge(as_pairs([]), as_pairs([0])))
+        self.assertEqual(as_pairs([0, 0]), merge(as_pairs([0]), as_pairs([0])))
+        self.assertEqual(as_pairs([0, 1]), merge(as_pairs([0]), as_pairs([1])))
+        self.assertEqual(as_pairs([0, 1]), merge(as_pairs([1]), as_pairs([0])))
+        self.assertEqual(
+            as_pairs(list(range(10))),
+            merge(
+                as_pairs([1, 3, 5, 7, 9]),
+                as_pairs([0, 2, 4, 6, 8])))
+        self.assertEqual(
+            as_pairs(list(range(12))),
+            merge(
+                as_pairs([0, 1, 2, 3, 4, 6, 8]),
+                as_pairs([5, 7, 9, 10, 11])))
+        self.assertEqual(
+            as_pairs([-5, -5, -3, -2, -1, 1, 5, 5, 8, 9]),
+            merge(
+                as_pairs([-5, -2, 1, 8, 9]),
+                as_pairs([-5, -3, -1, 5, 5])))
+
+    def test_merge_sort(self):
+        self.sort_tests(merge_sort)
