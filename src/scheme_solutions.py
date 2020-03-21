@@ -1052,11 +1052,60 @@ def merge_sort_iterable(list):
     sorted, _, _ = helper((), 0, (), 0, list)
     return sorted
 
-def tim_sort_iterable(list):
-    pass # TODO
+def take_run(list):
+    def helper(stack2, stack_size, list):
+        if stack_size < 2:
+            if list == ():
+                return (stack2, stack_size, ())
+            else:
+                head, tail = list
+                return helper((head, stack2), stack_size + 1, tail)
+        else:
+            assert stack_size == 2
+            second, (first, _) = stack2
+            if first <= second:
+                return take_weakly_increasing(stack2, 2, list)
+            else:
+                return take_strictly_decreasing(stack2, 2, list)
+    def take_weakly_increasing(stack, stack_size, list):
+        if list == ():
+            return (reverse_nontr(stack), stack_size, ())
+        else:
+            prev, _ = stack
+            head, tail = list
+            if prev <= head:
+                return take_weakly_increasing((head, stack), stack_size + 1, tail)
+            else:
+                return (reverse_nontr(stack), stack_size, list)
+    def take_strictly_decreasing(stack, stack_size, list):
+        if list == ():
+            return (stack, stack_size, ())
+        else:
+            prev, _ = stack
+            head, tail = list
+            if prev > head:
+                return take_strictly_decreasing((head, stack), stack_size + 1, tail)
+            else:
+                return (stack, stack_size, list)
+    return helper((), 0, list)
 
-iterable_sort = merge_sort_iterable
-#iterable_sort = tim_sort_iterable
+def tim_sort_iterable(list):
+    def helper(sorted1, len1, sorted2, len2, unsorted):
+        if unsorted == () or (len2 > 0 and len2 >= len1):
+            return (merge(sorted1, sorted2), len1 + len2, unsorted)
+        else:
+            run, run_len, tail = take_run(unsorted)
+            if len2 == 0:
+                sorted3, len3, new_tail = helper(sorted1, len1, run, run_len, tail)
+                return helper(sorted3, len3, (), 0, new_tail)
+            else:
+                sorted3, len3, new_tail = helper(sorted2, len2, run, run_len, tail)
+                return helper(sorted1, len1, sorted3, len3, new_tail)
+    sorted, _, _ = helper((), 0, (), 0, list)
+    return sorted
+
+#iterable_sort = merge_sort_iterable
+iterable_sort = tim_sort_iterable
 
 
 # Chapter 9: Nested lists (TODO)
