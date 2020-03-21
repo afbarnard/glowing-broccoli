@@ -1027,6 +1027,37 @@ def merge_sort(list):
             sorted2 = merge_sort(sub2)
             return merge(sorted1, sorted2)
 
+def iterable_sort(list):
+    """
+    Optional: As a challenge, write a version of merge sort that works
+    for iterables.  That is, it can't use `length` or `split` and must
+    look at the list one (head, tail) pair at a time.
+    """
+    pass
+
+def merge_sort_iterable(list):
+    # Bottom-up implementation that avoids traversing the list to find
+    # its length or split it
+    def helper(sorted1, len1, sorted2, len2, unsorted):
+        if unsorted == () or (len2 > 0 and len2 >= len1):
+            return (merge(sorted1, sorted2), len1 + len2, unsorted)
+        else:
+            head, tail = unsorted
+            if len2 == 0:
+                sorted3, len3, new_tail = helper(sorted1, len1, (head, ()), 1, tail)
+                return helper(sorted3, len3, (), 0, new_tail)
+            else:
+                sorted3, len3, new_tail = helper(sorted2, len2, (head, ()), 1, tail)
+                return helper(sorted1, len1, sorted3, len3, new_tail)
+    sorted, _, _ = helper((), 0, (), 0, list)
+    return sorted
+
+def tim_sort_iterable(list):
+    pass # TODO
+
+iterable_sort = merge_sort_iterable
+#iterable_sort = tim_sort_iterable
+
 
 # Chapter 9: Nested lists (TODO)
 
@@ -1721,3 +1752,11 @@ class SortingTest(unittest.TestCase):
 
     def test_merge_sort(self):
         self.sort_tests(merge_sort)
+
+    def test_iterable_sort(self):
+        # Only run this test if it has been implemented.  All functions
+        # whose body is only "return <value>" appear to have a byte code
+        # length of 4 and anything more complicated is longer (including
+        # "return <call>").
+        if len(iterable_sort.__code__.co_code) > 4:
+            self.sort_tests(iterable_sort)
