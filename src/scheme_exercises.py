@@ -154,6 +154,15 @@ def as_pairs_tr_seq(iterable):
 # Just use the iterative version from now on
 as_pairs = as_pairs_iter
 
+# Note that, from now on, lists will be written with Python syntax for
+# clarity and convenience, but that syntax will actually represent
+# linked lists consisting of (item, next) pairs.  This is the way Scheme
+# operates: `[1, 2, 3]` is actually just syntactic sugar for `(1, (2,
+# (3, ())))`.  Thus, if you want to try out your code, remember to pass
+# all Python "arrays" through `as_pairs` first.  For example,
+# `length([1, 2, 3, 4])` represents the actual Python code
+# `length(as_pairs([1, 2, 3, 4]))`.
+
 
 # Chapter 3.1: Basic list queries
 
@@ -394,8 +403,7 @@ def prepend_all(stack, list):
 
     For example:
 
-        prepend_all((3, (2, (1, ()))), (4, (5, ()))) ->
-            (1, (2, (3, (4, (5, ())))))
+        prepend_all([3, 2, 1], [4, 5]) -> [1, 2, 3, 4, 5]
     """
     pass
 
@@ -423,55 +431,143 @@ def delete_after_tr(list, key):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
 
-# Chapter 7: Slices and sublists (TODO)
+# Chapter 7: Sublists
 
-def get_slice(list, lo, hi):
+def sublist_at(list, index, length):
     """
-    Return the sublist that starts at index `lo` and ends at index `hi`
-    (inclusive).
-    """
-    pass
+    Return the sublist that starts at the given index and has the given
+    length.  If the index is out of bounds, return an empty list.  If
+    the length is too long, return only as many item as exist starting
+    at `index`.
 
-def set_slice(list1, lo, hi, list2):
-    """
-    Return a list that contains the given list in place of the indicated
-    slice (`lo` and `hi` are inclusive).
-    """
-    pass
+    For example:
 
-def insert_slice(list):
-    pass
-
-def delete_slice(list, lo, hi):
-    """
-    Return a list that omits the given slice (`lo` and `hi` are
-    inclusive indices).
+        get_sublist([1, 2, 3, 4, 5], 2, 2) -> [3, 4]
+        get_sublist([1, 2, 3, 4, 5], 4, 2) -> [5]
+        get_sublist([1, 2, 3, 4, 5], 6, 2) -> []
     """
     pass
 
-def get_all(list, indices):
-    """Return a sublist assembled from the items at the given indices."""
+def delete_sublist_at(list, index, length):
+    """
+    Return a list that omits the sublist that starts at the given index
+    and has the given length.  If the index is out of bounds, return the
+    list unmodified.  If the length is too long, delete only as many
+    items as exist starting at `index`.
+    """
     pass
 
-def del_all(list, indices):
-    """Delete all the items at the given indices."""
+def insert_sublist_at(list, index, sublist):
+    """
+    Return the given list with the given sublist inserted at the given
+    index.  If the index is one past the end, append the sublist.  If
+    the index is otherwise out of bounds, return the list unmodified.
+    """
+    pass
+
+def replace_sublist_at(list, index, length, sublist):
+    """
+    Return a list that contains the given sublist in place of the
+    existing sublist that starts at the given index and has the given
+    length.  If the index is one past the end, append the sublist.  If
+    the index is otherwise out of bounds, return the list unmodified.
+    If the length is too long, replace as many items as exist starting
+    at `index`.
+    """
     pass
 
 def contains_sublist(list, sublist):
     """Return whether the given list contains the given sublist."""
     pass
 
+def select_all(list, indices):
+    """
+    Return a sublist assembled from the items at the given indices.  If
+    an index is out of bounds, ignore it.
+    """
+    pass
 
-# Chapter 8: Sorting (TODO)
+def remove_all(list, indices):
+    """
+    Remove all the items at the given indices.  If an index is out of
+    bounds, ignore it.
+    """
+    pass
+
+def split(list, index):
+    """
+    Split the given list into two sublists at the given index and return
+    both sublists.  The first sublist should contain items at index 0
+    through `index - 1`, and the second sublist should contain the items
+    at index `index` through the end.  If the given index is too high,
+    return `(list, ())`.
+    """
+    pass
+
+# Check with: python3 -m unittest scheme_exercises.SublistsTest
+
+
+# Chapter 8: Sorting
+
+def extract_minimum(list):
+    """
+    Extract the minimum from the given list of integers and return it
+    and the rest of the list as a pair.  If the list is empty, the
+    minimum is None.  If the minimum is not unique, extract its first
+    occurrence.
+
+    For example:
+
+        extract_minimum([]) -> (None, [])
+        extract_minimum([3, 4, 6, 5, 4]) -> (4, [3, 6, 5, 4])
+    """
+    pass
+
+def selection_sort(list):
+    """
+    Sort the given list and return it.  Use the selection sort
+    algorithm: Extract the minimum, put it at the front, and recur on
+    the rest.  Write a stable implementation.
+    """
+    pass
 
 def insort_first(list, key):
+    """
+    Insert the given key at its earliest position in sorted order.
+    Return the resulting list.
+    """
     pass
 
-def insort_last(list, key):
+def insertion_sort(list):
+    """
+    Sort the given list and return it.  Use the insertion sort
+    algorithm: Starting from a sorted list, insert the next element into
+    it, and repeat until the whole list is sorted.  Write a stable
+    implementation.
+    """
     pass
 
-def merge_sort(list, compare=None):
+def merge(sorted1, sorted2):
+    """Merge two sorted lists into a single sorted list."""
     pass
+
+def merge_sort(list):
+    """
+    Sort the given list and return it.  Use the merge sort algorithm:
+    Split the list into two halves, sort the first half, sort the second
+    half, then merge the two halves.  Write a stable implementation.
+    """
+    pass
+
+def iterable_sort(list):
+    """
+    Optional: As a challenge, write a version of merge sort that works
+    for iterables.  That is, it can't use `length` or `split` and must
+    look at the list one (head, tail) pair at a time.
+    """
+    pass
+
+# Check with: python3 -m unittest scheme_exercises.SortingTest
 
 
 # Chapter 9: Nested lists (TODO)
@@ -974,3 +1070,236 @@ class IntermediateListModificationsTrTest(_IntermediateListModificationsTests):
 
     def test_delete_after_tr(self):
         self.delete_after_tests(delete_after_tr)
+
+
+class SublistsTest(unittest.TestCase):
+
+    def test_sublist_at(self):
+        # Empty list
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs(''), 0, 1))
+        # Zero length
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 0, 0))
+        # Bad length
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 1, -1))
+        # Sliding window (includes indices out of bounds)
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), -1, 2))
+        self.assertEqual(as_pairs('12'), sublist_at(as_pairs('123'), 0, 2))
+        self.assertEqual(as_pairs('23'), sublist_at(as_pairs('123'), 1, 2))
+        self.assertEqual(as_pairs('3'), sublist_at(as_pairs('123'), 2, 2))
+        self.assertEqual(as_pairs(''), sublist_at(as_pairs('123'), 3, 2))
+        # Whole list
+        self.assertEqual(as_pairs('123'), sublist_at(as_pairs('123'), 0, 3))
+
+    def delete_sublist_at_tests(self, dlt):
+        # Empty list
+        self.assertEqual(as_pairs(''), dlt(as_pairs(''), 0, 1))
+        # Zero length
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 0, 0))
+        # Bad length
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 1, -1))
+        # Sliding window (includes indices out of bounds)
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), -1, 2))
+        self.assertEqual(as_pairs('3'), dlt(as_pairs('123'), 0, 2))
+        self.assertEqual(as_pairs('1'), dlt(as_pairs('123'), 1, 2))
+        self.assertEqual(as_pairs('12'), dlt(as_pairs('123'), 2, 2))
+        self.assertEqual(as_pairs('123'), dlt(as_pairs('123'), 3, 2))
+        # Whole list
+        self.assertEqual(as_pairs(''), dlt(as_pairs('123'), 0, 3))
+
+    def test_delete_sublist_at(self):
+        self.delete_sublist_at_tests(delete_sublist_at)
+
+    def insert_sublist_at_tests(self, ins):
+        # Empty lists
+        self.assertEqual(as_pairs(''), ins(as_pairs(''), 0, as_pairs('')))
+        self.assertEqual(as_pairs('x'), ins(as_pairs(''), 0, as_pairs('x')))
+        self.assertEqual(as_pairs('a'), ins(as_pairs('a'), 0, as_pairs('')))
+        # Insert at beginning
+        self.assertEqual(as_pairs('xyabc'), ins(as_pairs('abc'), 0, as_pairs('xy')))
+        # Insert in middle
+        self.assertEqual(as_pairs('abxyc'), ins(as_pairs('abc'), 2, as_pairs('xy')))
+        # Insert at end
+        self.assertEqual(as_pairs('abcxy'), ins(as_pairs('abc'), 3, as_pairs('xy')))
+        # Indices out of bounds
+        self.assertEqual(as_pairs('abc'), ins(as_pairs('abc'), -1, as_pairs('xy')))
+        self.assertEqual(as_pairs('abc'), ins(as_pairs('abc'), 4, as_pairs('xy')))
+
+    def test_insert_sublist_at(self):
+        self.insert_sublist_at_tests(insert_sublist_at)
+
+    def test_replace_sublist_at(self):
+        rpl = replace_sublist_at
+        # Do deletion tests
+        self.delete_sublist_at_tests(lambda l, i, s: rpl(l, i, s, ()))
+        # Do insertion tests
+        self.insert_sublist_at_tests(lambda l, i, s: rpl(l, i, 0, s))
+        # Replace at beginning
+        self.assertEqual(as_pairs('xyz2345'),
+                         rpl(as_pairs('12345'), 0, 1, as_pairs('xyz')))
+        self.assertEqual(as_pairs('xyz45'),
+                         rpl(as_pairs('12345'), 0, 3, as_pairs('xyz')))
+        self.assertEqual(as_pairs('xyz'),
+                         rpl(as_pairs('12345'), 0, 5, as_pairs('xyz')))
+        # Replace in middle
+        self.assertEqual(as_pairs('1xyz5'),
+                         rpl(as_pairs('12345'), 1, 3, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12xyz45'),
+                         rpl(as_pairs('12345'), 2, 1, as_pairs('xyz')))
+        # Replace at end
+        self.assertEqual(as_pairs('12xyz'),
+                         rpl(as_pairs('12345'), 2, 4, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12345xyz'),
+                         rpl(as_pairs('12345'), 5, 3, as_pairs('xyz')))
+        # Indices out of bounds
+        self.assertEqual(as_pairs('12345'),
+                         rpl(as_pairs('12345'), -1, 5, as_pairs('xyz')))
+        self.assertEqual(as_pairs('12345'),
+                         rpl(as_pairs('12345'), 6, 6, as_pairs('xyz')))
+
+    def test_contains_sublist(self):
+        ctn = contains_sublist
+        # Empty doesn't contain anything except empty
+        self.assertEqual(False, ctn(as_pairs(''), as_pairs('xyz')))
+        self.assertEqual(True, ctn(as_pairs(''), as_pairs('')))
+        # Everything contains empty
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('')))
+        # Sublist length 1
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('a')))
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('c')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('x')))
+        # Sublist length 2
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('ab')))
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('bc')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('ac')))
+        # Contains self
+        self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('abc')))
+        self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('abcd')))
+
+    def test_select_all(self):
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs('abcdefghijklm'), as_pairs([])))
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs(''), as_pairs([3, 1, 2, 0])))
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs('abc'), as_pairs([3, 4, 5])))
+        self.assertEqual(as_pairs('abc'), select_all(
+            as_pairs('abc'), as_pairs([0, 1, 2])))
+        self.assertEqual(as_pairs('cdfil'), select_all(
+            as_pairs('abcdefghijklm'), as_pairs([2, 3, 5, 8, 11])))
+        self.assertEqual(as_pairs('feedface'), select_all(
+            as_pairs('abcdef'), as_pairs([5, 4, 4, 3, 5, 0, 2, 4])))
+        self.assertEqual(as_pairs('aaccee'), select_all(
+            as_pairs('abcdef'), as_pairs([0, 0, 2, 2, 4, 4])))
+
+    def test_remove_all(self):
+        self.assertEqual(as_pairs('abc'), remove_all(
+            as_pairs('abc'), as_pairs([])))
+        self.assertEqual(as_pairs(''), remove_all(
+            as_pairs(''), as_pairs([3, 1, 2, 0])))
+        self.assertEqual(as_pairs('abc'), remove_all(
+            as_pairs('abc'), as_pairs([3, 4, 5])))
+        self.assertEqual(as_pairs(''), remove_all(
+            as_pairs('abc'), as_pairs([0, 1, 2])))
+        self.assertEqual(as_pairs('abeghjkm'), remove_all(
+            as_pairs('abcdefghijklm'), as_pairs([2, 3, 5, 8, 11])))
+        self.assertEqual(as_pairs('b'), remove_all(
+            as_pairs('abcdef'), as_pairs([5, 4, 4, 3, 5, 0, 2, 4])))
+        self.assertEqual(as_pairs('ace'), remove_all(
+            as_pairs('abcdef'), as_pairs([1, 1, 3, 3, 5, 5])))
+
+    def test_split(self):
+        self.assertEqual((as_pairs([]), as_pairs([])),
+                         split(as_pairs([]), 1))
+        self.assertEqual((as_pairs([]), as_pairs([1, 2, 3])),
+                         split(as_pairs([1, 2, 3]), 0))
+        self.assertEqual((as_pairs([1, 2, 3]), as_pairs([])),
+                         split(as_pairs([1, 2, 3]), 3))
+        self.assertEqual((as_pairs([1]), as_pairs([2, 3, 4, 5])),
+                         split(as_pairs([1, 2, 3, 4, 5]), 1))
+        self.assertEqual((as_pairs([1, 2, 3, 4]), as_pairs([5])),
+                         split(as_pairs([1, 2, 3, 4, 5]), 4))
+
+
+class SortingTest(unittest.TestCase):
+
+    def test_extract_minimum(self):
+        self.assertEqual(as_pairs([None]), extract_minimum(as_pairs([])))
+        self.assertEqual(as_pairs([4]), extract_minimum(as_pairs([4])))
+        self.assertEqual(as_pairs([-4, 8]), extract_minimum(as_pairs([-4, 8])))
+        self.assertEqual(as_pairs([-4, 8]), extract_minimum(as_pairs([8, -4])))
+        self.assertEqual(as_pairs([1, 2, 2]), extract_minimum(as_pairs([2, 1, 2])))
+        self.assertEqual(as_pairs([-7, 4, 4, -4, 2, 1, 4, -7]),
+                         extract_minimum(as_pairs([4, 4, -4, 2, 1, -7, 4, -7])))
+
+    def sort_tests(self, sort_func):
+        self.assertEqual(as_pairs([]), sort_func(as_pairs([])))
+        self.assertEqual(as_pairs([1]), sort_func(as_pairs([1])))
+        self.assertEqual(as_pairs([-3, -2, -1]),
+                         sort_func(as_pairs([-3, -2, -1])))
+        self.assertEqual(as_pairs([1, 2, 3, 4, 5]),
+                         sort_func(as_pairs([5, 4, 3, 2, 1])))
+        self.assertEqual(as_pairs([0, 1, 1, 1, 1, 1, 1]),
+                         sort_func(as_pairs([1, 1, 1, 1, 1, 1, 0])))
+        self.assertEqual(
+            as_pairs(
+                [-9, -7, -7, -7, -4, -3, -2, 0, 1, 2, 6, 6, 7, 7, 8, 9, 9]),
+            sort_func(as_pairs(
+                [9, 7, -4, 2, -9, 9, 7, 0, 8, -3, 6, -7, -2, -7, 1, -7, 6])))
+
+    def test_selection_sort(self):
+        self.sort_tests(selection_sort)
+
+    def test_insort_first(self):
+        self.assertEqual(as_pairs([0]), insort_first(as_pairs([]), 0))
+        self.assertEqual(as_pairs([0, 0]), insort_first(as_pairs([0]), 0))
+        self.assertEqual(as_pairs([0, 1]), insort_first(as_pairs([0]), 1))
+        self.assertEqual(as_pairs([0, 1]), insort_first(as_pairs([1]), 0))
+        # Insort at beginning
+        self.assertEqual(as_pairs([-4, -4, -3, 0, 1, 3, 4, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), -4))
+        self.assertEqual(as_pairs([-4, -3, -3, 0, 1, 3, 4, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), -3))
+        # Insort at end
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 7, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 7))
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 8, 8]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 8))
+        self.assertEqual(as_pairs([-4, -3, 0, 1, 3, 4, 8, 9]),
+                         insort_first(as_pairs([-4, -3, 0, 1, 3, 4, 8]), 9))
+
+    def test_insertion_sort(self):
+        self.sort_tests(insertion_sort)
+
+    def test_merge(self):
+        self.assertEqual(as_pairs([]), merge(as_pairs([]), as_pairs([])))
+        self.assertEqual(as_pairs([0]), merge(as_pairs([0]), as_pairs([])))
+        self.assertEqual(as_pairs([0]), merge(as_pairs([]), as_pairs([0])))
+        self.assertEqual(as_pairs([0, 0]), merge(as_pairs([0]), as_pairs([0])))
+        self.assertEqual(as_pairs([0, 1]), merge(as_pairs([0]), as_pairs([1])))
+        self.assertEqual(as_pairs([0, 1]), merge(as_pairs([1]), as_pairs([0])))
+        self.assertEqual(
+            as_pairs(list(range(10))),
+            merge(
+                as_pairs([1, 3, 5, 7, 9]),
+                as_pairs([0, 2, 4, 6, 8])))
+        self.assertEqual(
+            as_pairs(list(range(12))),
+            merge(
+                as_pairs([0, 1, 2, 3, 4, 6, 8]),
+                as_pairs([5, 7, 9, 10, 11])))
+        self.assertEqual(
+            as_pairs([-5, -5, -3, -2, -1, 1, 5, 5, 8, 9]),
+            merge(
+                as_pairs([-5, -2, 1, 8, 9]),
+                as_pairs([-5, -3, -1, 5, 5])))
+
+    def test_merge_sort(self):
+        self.sort_tests(merge_sort)
+
+    def test_iterable_sort(self):
+        # Only run this test if it has been implemented.  All functions
+        # whose body is only "return <value>" appear to have a byte code
+        # length of 4 and anything more complicated is longer (including
+        # "return <call>").
+        if len(iterable_sort.__code__.co_code) > 4:
+            self.sort_tests(iterable_sort)

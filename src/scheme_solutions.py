@@ -956,6 +956,8 @@ def split(list, index):
         sub1, sub2 = split(tail, index - 1)
         return ((head, sub1), sub2)
 
+# Check with: python3 -m unittest scheme_exercises.SublistsTest
+
 
 # Chapter 8: Sorting
 
@@ -1145,6 +1147,8 @@ def tim_sort_iterable(list):
 
 #iterable_sort = merge_sort_iterable
 iterable_sort = tim_sort_iterable
+
+# Check with: python3 -m unittest scheme_exercises.SortingTest
 
 
 # Chapter 9: Nested lists (TODO)
