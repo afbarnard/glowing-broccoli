@@ -781,7 +781,7 @@ def delete_after_tr(list, key):
 # Check with: python3 -m unittest scheme_exercises.IntermediateListModificationsTrTest
 
 
-# Chapter 7: Sublists (TODO)
+# Chapter 7: Sublists
 
 def sublist_at(list, index, length):
     """
@@ -893,12 +893,51 @@ def contains_sublist(list, sublist):
             return contains_sublist(tail, sublist)
 
 def select_all(list, indices):
-    """Return a sublist assembled from the items at the given indices."""
-    pass
+    """
+    Return a sublist assembled from the items at the given indices.  If
+    an index is out of bounds, ignore it.
+    """
+    def helper(list, revrsd_idxs, selected):
+        if revrsd_idxs == ():
+            return selected
+        else:
+            idx, idxs = revrsd_idxs
+            item = get_tr(list, idx)
+            if isinstance(item, IndexError):
+                return helper(list, idxs, selected)
+            else:
+                return helper(list, idxs, (item, selected))
+    return helper(list, reverse_nontr(indices), ())
 
 def remove_all(list, indices):
-    """Remove all the items at the given indices."""
-    pass
+    """
+    Remove all the items at the given indices.  If an index is out of
+    bounds, ignore it.
+    """
+    def uniq(list):
+        def helper(prev, list):
+            if list == ():
+                return ()
+            else:
+                head, tail = list
+                if head == prev:
+                    return helper(prev, tail)
+                else:
+                    return (head, helper(head, tail))
+        return helper(helper, list)
+    def helper(list, index, sorted_indices):
+        if list == ():
+            return ()
+        elif sorted_indices == ():
+            return list
+        else:
+            head, tail = list
+            idx, idxs = sorted_indices
+            if index == idx:
+                return helper(tail, index + 1, idxs)
+            else:
+                return (head, helper(tail, index + 1, sorted_indices))
+    return helper(list, 0, uniq(merge_sort(indices)))
 
 def split(list, index):
     """
@@ -1712,6 +1751,38 @@ class SublistsTest(unittest.TestCase):
         # Contains self
         self.assertEqual(True, ctn(as_pairs('abc'), as_pairs('abc')))
         self.assertEqual(False, ctn(as_pairs('abc'), as_pairs('abcd')))
+
+    def test_select_all(self):
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs('abcdefghijklm'), as_pairs([])))
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs(''), as_pairs([3, 1, 2, 0])))
+        self.assertEqual(as_pairs(''), select_all(
+            as_pairs('abc'), as_pairs([3, 4, 5])))
+        self.assertEqual(as_pairs('abc'), select_all(
+            as_pairs('abc'), as_pairs([0, 1, 2])))
+        self.assertEqual(as_pairs('cdfil'), select_all(
+            as_pairs('abcdefghijklm'), as_pairs([2, 3, 5, 8, 11])))
+        self.assertEqual(as_pairs('feedface'), select_all(
+            as_pairs('abcdef'), as_pairs([5, 4, 4, 3, 5, 0, 2, 4])))
+        self.assertEqual(as_pairs('aaccee'), select_all(
+            as_pairs('abcdef'), as_pairs([0, 0, 2, 2, 4, 4])))
+
+    def test_remove_all(self):
+        self.assertEqual(as_pairs('abc'), remove_all(
+            as_pairs('abc'), as_pairs([])))
+        self.assertEqual(as_pairs(''), remove_all(
+            as_pairs(''), as_pairs([3, 1, 2, 0])))
+        self.assertEqual(as_pairs('abc'), remove_all(
+            as_pairs('abc'), as_pairs([3, 4, 5])))
+        self.assertEqual(as_pairs(''), remove_all(
+            as_pairs('abc'), as_pairs([0, 1, 2])))
+        self.assertEqual(as_pairs('abeghjkm'), remove_all(
+            as_pairs('abcdefghijklm'), as_pairs([2, 3, 5, 8, 11])))
+        self.assertEqual(as_pairs('b'), remove_all(
+            as_pairs('abcdef'), as_pairs([5, 4, 4, 3, 5, 0, 2, 4])))
+        self.assertEqual(as_pairs('ace'), remove_all(
+            as_pairs('abcdef'), as_pairs([1, 1, 3, 3, 5, 5])))
 
     def test_split(self):
         self.assertEqual((as_pairs([]), as_pairs([])),
