@@ -1151,18 +1151,76 @@ iterable_sort = tim_sort_iterable
 # Check with: python3 -m unittest scheme_exercises.SortingTest
 
 
-# Chapter 9: Nested lists (TODO)
+# Chapter 9: Nested lists
+
+# Working with nested lists requires two additional pieces of machinery.
+# The first is a predicate to tell when an item is a list and needs
+# recursive processing, and the second is a version of `as_pairs` that
+# can handle nested lists.  The latter will be needed to convert nested
+# Python lists into nested Scheme-style linked lists, and also serves as
+# a good example of how to do recursive programming with nested lists.
+
+def is_list(obj):
+    if obj == ():
+        return True
+    else:
+        return (isinstance(obj, tuple) and
+                len(obj) == 2 and is_list(obj[1]))
+
+def nested_as_pairs(iterable):
+    itr = iter(iterable)
+    head = next(itr, itr)
+    if head is itr:
+        return ()
+    # Instead of the following `isinstance` which tests for Python
+    # lists, your code should use `is_list` to test for Scheme-style
+    # linked lists.
+    elif isinstance(head, list):
+        return (nested_as_pairs(head), nested_as_pairs(itr))
+    else:
+        return (head, nested_as_pairs(itr))
 
 def count_nested_matches(list, key):
     """
     Return the number of occurrences of the given key in all of the
     given nested lists.
     """
-    pass
+    if list == ():
+        return 0
+    else:
+        head, tail = list
+        if is_list(head):
+            return (count_nested_matches(head, key) +
+                    count_nested_matches(tail, key))
+        elif head == key:
+            return 1 + count_nested_matches(tail, key)
+        else:
+            return count_nested_matches(tail, key)
 
 def minimum_nested(list):
-    """Return the minimum of the integers in the given list."""
-    pass
+    """
+    Return the minimum of the integers in the given list.  If there are
+    no integers, then the minimum is None.
+    """
+    if list == ():
+        return None
+    else:
+        head, tail = list
+        if is_list(head):
+            min_head = minimum_nested(head)
+        elif isinstance(head, int):
+            min_head = head
+        else:
+            min_head = None
+        min_tail = minimum_nested(tail)
+        if min_head is None:
+            return min_tail
+        elif min_tail is None:
+            return min_head
+        elif min_head <= min_tail:
+            return min_head
+        else:
+            return min_tail
 
 def deepest_level(list):
     """Return the deepest level of nesting of items in the given list.
@@ -1173,7 +1231,21 @@ def deepest_level(list):
         ['a', True, 9.99] -> 1
         [1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]] -> 9
     """
-    pass
+    if list == ():
+        return 0
+    else:
+        head, tail = list
+        if is_list(head):
+            depth_head = deepest_level(head)
+            if depth_head > 0:
+                depth_head += 1
+        else:
+            depth_head = 1
+        depth_tail = deepest_level(tail)
+        if depth_head >= depth_tail:
+            return depth_head
+        else:
+            return depth_tail
 
 def flatten(list):
     """
@@ -1185,7 +1257,17 @@ def flatten(list):
         flatten([1, 2, [['a', 'b', 'e']], [[12, 21], 32, 23, []]]) ->
             [1, 2, 'a', 'b', 'e', 12, 21, 32, 23]
     """
-    pass
+    def helper(list, flattened):
+        if list == ():
+            return flattened
+        else:
+            head, tail = list
+            flat_tail = helper(tail, flattened)
+            if is_list(head):
+                return helper(head, flat_tail)
+            else:
+                return (head, flat_tail)
+    return helper(list, ())
 
 def delete_all_all(list, keys):
     """
@@ -1197,7 +1279,19 @@ def delete_all_all(list, keys):
         delete_all_all([[2], 5, 1, [1, 2, [1, 2], 4, [2, 1]], [[2, 3], 1]], [1, 2]) ->
             [[], 5, [[], 4, []], [[3]]]
     """
-    pass
+    if list == ():
+        return ()
+    else:
+        head, tail = list
+        if is_list(head):
+            return (delete_all_all(head, keys),
+                    delete_all_all(tail, keys))
+        elif contains_tr(keys, head):
+            return delete_all_all(tail, keys)
+        else:
+            return (head, delete_all_all(tail, keys))
+
+# Check with: python3 -m unittest scheme_exercises.NestedListsTest
 
 
 # Tests
@@ -1884,3 +1978,99 @@ class SortingTest(unittest.TestCase):
         # "return <call>").
         if len(iterable_sort.__code__.co_code) > 4:
             self.sort_tests(iterable_sort)
+
+
+class NestedListsInfrastructureTest(unittest.TestCase):
+
+    def test_is_list(self):
+        self.assertEqual(True, is_list(()))
+        self.assertEqual(True, is_list(('a', ())))
+        self.assertEqual(False, is_list(('a', 'b')))
+        self.assertEqual(True, is_list((('a', ()), ('b', ('c', ())))))
+        self.assertEqual(False, is_list((('a', ()), ('b', ('c', None)))))
+        self.assertEqual(False, is_list([]))
+        self.assertEqual(False, is_list((0, 1, 2)))
+        self.assertEqual(False, is_list((0,)))
+
+    def test_nested_as_pairs(self):
+        nap = nested_as_pairs
+        # Empty
+        self.assertEqual((), nap([]))
+        # Sequence
+        self.assertEqual(
+            ((), ((), ((), ((), ((), ()))))),
+            nap([[], [], [], [], []]))
+        # Nested
+        self.assertEqual(
+            (((((), ()), ()), ()), ()),
+            nap([[[[[]]]]]))
+        # Nested + sequence
+        self.assertEqual(
+            (((), ()), (((), ((), ())), ())),
+            nap([[[]], [[], []]]))
+        # With other items
+        self.assertEqual(
+            (1, ((2, (((4, ()), ()), ())), (((3, ()), ()), ()))),
+            nap([1, [2, [[4]]], [[3]]]))
+
+
+class NestedListsTest(unittest.TestCase):
+
+    def test_count_nested_matches(self):
+        nap = nested_as_pairs
+        self.assertEqual(0, count_nested_matches(nap([]), 1))
+        self.assertEqual(0, count_nested_matches(nap([0]), 1))
+        self.assertEqual(1, count_nested_matches(nap([0]), 0))
+        self.assertEqual(7, count_nested_matches(
+            nap([[[[[[5, 0], 4, 0], 3, 0], 2, 0], 1, 0], 0, 0]), 0))
+        self.assertEqual(7, count_nested_matches(
+            nap([0, 0, [1, 0, [2, 0, [3, 0, [4, 0, [5, 0]]]]]]), 0))
+        self.assertEqual(4, count_nested_matches(
+            nap(['000', (0, 0, 0), [0, 0, 0, ['0', (0,), [0]]]]), 0))
+
+    def test_minimum_nested(self):
+        nap = nested_as_pairs
+        self.assertEqual(None, minimum_nested(nap([])))
+        self.assertEqual(None, minimum_nested(nap('abcde')))
+        self.assertEqual(1, minimum_nested(
+            nap(['a', (0,), [['b'], 1], 2, 'c'])))
+        self.assertEqual(-5, minimum_nested(
+            nap([[0], [0, [-1]], [0, [-1, [-2]]],
+                 [0, [-1, [-2, [-3, [-4, [-5]]]]]]])))
+        self.assertEqual(-10, minimum_nested(
+            nap([0, [-1, [-2, [-3, [-4, [-5], -6], -7], -8], -9], -10])))
+
+    def test_deepest_level(self):
+        nap = nested_as_pairs
+        self.assertEqual(0, deepest_level(nap([])))
+        self.assertEqual(0, deepest_level(nap([[[]]])))
+        self.assertEqual(1, deepest_level(nap(['a', True, 9.99])))
+        self.assertEqual(9, deepest_level(
+            nap([1, [2, [3, [4, [5, [6, [7, [8, [9]]]]]]]]])))
+        self.assertEqual(5, deepest_level(
+            nap(['a', ['b'], [['c']], [[['d']]], [[[['e']]]]])))
+        self.assertEqual(5, deepest_level(
+            nap(['a', ['b'], [['c']], [[['d']]], [[[['e']]]],
+                 [[[[[]]]]]])))
+
+    def test_flatten(self):
+        nap = nested_as_pairs
+        self.assertEqual(nap([]), flatten(nap([])))
+        self.assertEqual(nap([]), flatten(
+            nap([[[[[], []], []], []], [[], [[], [[], []]]]])))
+        self.assertEqual(nap(range(4)), flatten(
+            nap([[[[[0], [1]], []], []], [[], [[], [[2], [3]]]]])))
+        self.assertEqual(
+            nap([1, (2, []), 'a', 'b', 'e', 12, 21, 32, 23]),
+            flatten(nap([1, (2, []), [['a', 'b', 'e']], [[12, 21], 32, 23, []]])))
+
+    def test_delete_all_all(self):
+        nap = nested_as_pairs
+        daa = delete_all_all
+        self.assertEqual(nap([]), daa(nap([]), nap(range(10))))
+        self.assertEqual(nap(range(10)), daa(nap(range(10)), nap([])))
+        self.assertEqual(nap([]), daa(nap(range(10)), nap(range(10))))
+        self.assertEqual(
+            nap([[], 5, [[], 4, []], [[3]]]),
+            daa(nap([[2], 5, 1, [1, 2, [1, 2], 4, [2, 1]], [[2, 3], 1]]),
+                nap([1, 2])))
